@@ -12,37 +12,8 @@
     <link rel="stylesheet" href="/src/index.css">
 </head>
 <body>
-    <!-- Authentication Page -->
-    <div id="auth-page">
-        <div class="login-card">
-            <div style="margin-bottom: 2rem;">
-                <div style="width: 80px; height: 80px; background: #800000; border-radius: 20px; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-            </div>
-            <h2>PUP CpE Portal</h2>
-            <p>Thesis Management Dashboard</p>
-            <p style="font-size: 0.75rem; color: #888; margin-top: -1.5rem; margin-bottom: 2rem;">(Use any username/password for this prototype)</p>
-            
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="e.g., admin_cpe" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="login-btn">Login to Dashboard</button>
-            </form>
-        </div>
-    </div>
-
     <!-- Main Application Shell -->
-    <div id="main-app" class="hidden">
+    <div id="main-app">
         <!-- Mobile Toggle (Hidden on Desktop) -->
         <button class="mobile-toggle" id="sidebar-toggle">☰</button>
         
@@ -50,13 +21,13 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h1>PUP CpE</h1>
-                <p>Thesis Management System</p>
+                <p>Digital Thesis Repository</p>
             </div>
             
             <ul class="nav-links">
                 <li class="nav-item active" data-view="dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    Dashboard
+                    Archive Overview
                 </li>
                 <li class="nav-item" data-view="register">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -74,10 +45,10 @@
             
             <!-- Fixed Profile Section at Bottom -->
             <div class="sidebar-footer">
-                <div class="user-avatar">JD</div>
+                <div class="user-avatar" id="user-avatar-display">GV</div>
                 <div class="user-info">
-                    <h4 id="user-display-name">John Doe</h4>
-                    <p id="user-display-role">Administrator v2.0</p>
+                    <h4 id="user-display-name">Guest Viewer</h4>
+                    <p id="user-display-role">Student / Read-only</p>
                 </div>
             </div>
         </aside>
@@ -105,27 +76,15 @@
                 <!-- KPI Cards (4-Column Grid) -->
                 <div class="kpi-grid">
                     <div class="kpi-card">
-                        <div class="kpi-label">Total Ongoing</div>
-                        <div class="kpi-value">42</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Completed</div>
-                        <div class="kpi-value">128</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Rejected</div>
-                        <div class="kpi-value">12</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Pending UREC</div>
-                        <div class="kpi-value">08</div>
+                        <div class="kpi-label">Total Archived Theses</div>
+                        <div class="kpi-value" id="total-theses-count">0</div>
                     </div>
                 </div>
 
                 <!-- Recent Activity Table -->
                 <div class="section-card">
                     <div class="section-header">
-                        <h3>Recent Panel Evaluations</h3>
+                        <h3>Recently Archived Theses</h3>
                         <button class="btn" style="color: #800000; padding: 0; background: transparent;">View All</button>
                     </div>
                     <div class="table-container">
@@ -139,21 +98,8 @@
                                     <th>Date</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr class="clickable-row">
-                                    <td>AI-Based Traffic Management for Manila</td>
-                                    <td>Santos, Reyes, Cruz</td>
-                                    <td>Engr. Dela Cruz</td>
-                                    <td><span class="status-badge status-passed">Passed</span></td>
-                                    <td>Mar 15, 2026</td>
-                                </tr>
-                                <tr class="clickable-row">
-                                    <td>IoT Smart Farming in Bulacan</td>
-                                    <td>Perez, Gomez, Lim</td>
-                                    <td>Dr. Bautista</td>
-                                    <td><span class="status-badge status-pending">Pending</span></td>
-                                    <td>Mar 14, 2026</td>
-                                </tr>
+                            <tbody id="recent-theses-body">
+                                <!-- Dynamic recent theses will be injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -175,15 +121,23 @@
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label class="required-label">Group Code</label>
-                                    <input type="text" placeholder="e.g., CPE-2026-G01" required>
+                                    <input type="text" id="group-code" placeholder="e.g., CPE-2026-G01" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Year Level</label>
-                                    <input type="number" value="5" min="1" max="5" required>
+                                    <input type="number" id="year-level" value="5" min="1" max="5" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Section</label>
-                                    <input type="text" placeholder="e.g., 5-1" required>
+                                    <input type="text" id="section" placeholder="e.g., 5-1" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label class="required-label">Thesis Title</label>
+                                    <input type="text" id="thesis-title" placeholder="Enter complete thesis title..." required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label class="required-label">Abstract</label>
+                                    <textarea id="abstract-input" rows="4" placeholder="Enter thesis abstract..." style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; outline: none; transition: border-color 0.2s; resize: none; overflow: hidden;" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -194,11 +148,11 @@
                                 <div class="form-grid" style="margin-bottom: 1rem;">
                                     <div class="form-group">
                                         <label>Author 1 (Leader)</label>
-                                        <input type="text" placeholder="Full Name" required>
+                                        <input type="text" class="author-name-input" placeholder="Full Name" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Student Number</label>
-                                        <input type="text" placeholder="20XX-XXXXX-MN-0" required>
+                                        <input type="text" class="author-student-no-input" placeholder="20XX-XXXXX-MN-0" required>
                                     </div>
                                 </div>
                             </div>
@@ -206,22 +160,29 @@
                         </div>
 
                         <div class="form-section">
-                            <h3 class="form-section-title">Faculty & Status</h3>
+                            <h3 class="form-section-title">Faculty & Final Approval Panel</h3>
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label class="required-label">Main Adviser</label>
-                                    <select class="semester-select" style="width: 100%;" required>
-                                        <option value="">Select Faculty</option>
-                                        <option>Engr. Dela Cruz</option>
-                                        <option>Dr. Bautista</option>
-                                    </select>
+                                    <input type="text" id="main-adviser" placeholder="e.g., Engr. Dela Cruz" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Co-Adviser</label>
-                                    <select class="semester-select" style="width: 100%;">
-                                        <option value="">None</option>
-                                        <option>Engr. Lopez</option>
-                                    </select>
+                                    <input type="text" id="co-adviser" placeholder="e.g., Engr. Lopez">
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="required-label">Panel Chair</label>
+                                    <input type="text" id="panel-chair" placeholder="Panel Chair Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Panel Member 1</label>
+                                    <input type="text" id="panel-member-1" placeholder="Panel Member Name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Panel Member 2</label>
+                                    <input type="text" id="panel-member-2" placeholder="Panel Member Name">
                                 </div>
                             </div>
                         </div>
@@ -250,13 +211,20 @@
                     
                     <div class="filters-row">
                         <select class="filter-select">
-                            <option value="">All Status</option>
-                            <option>Ongoing</option>
-                            <option>Completed</option>
+                            <option value="">All Topics</option>
+                            <option>Artificial Intelligence</option>
+                            <option>Internet of Things</option>
+                            <option>Robotics</option>
                         </select>
                         <select class="filter-select">
-                            <option value="">All Years</option>
-                            <option>2025-2026</option>
+                            <option value="">All Batches (Years)</option>
+                            <option>2026</option>
+                            <option>2025</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">All Sections</option>
+                            <option>5-1</option>
+                            <option>5-2</option>
                         </select>
                     </div>
 
@@ -266,21 +234,13 @@
                                 <tr>
                                     <th>Code</th>
                                     <th>Thesis Title</th>
-                                    <th>Authors</th>
+                                    <th>Adviser</th>
                                     <th>Status</th>
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr class="clickable-row">
-                                    <td>G01</td>
-                                    <td>AI-Based Traffic Management</td>
-                                    <td>Santos, Reyes, Cruz</td>
-                                    <td><span class="status-badge status-passed">Completed</span></td>
-                                    <td style="text-align: right;">
-                                        <button class="btn btn-primary btn-evaluate" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;">Evaluate</button>
-                                    </td>
-                                </tr>
+                            <tbody id="repository-table-body">
+                                <!-- Dynamic theses from database will be injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -329,43 +289,28 @@
             <div class="tabs-nav">
                 <button class="tab-btn active" data-tab="overview">Overview</button>
                 <button class="tab-btn" data-tab="faculty">Advisers & Panel</button>
-                <button class="tab-btn" data-tab="history">Evaluation History</button>
             </div>
 
             <div class="modal-body">
                 <div class="tab-content active" id="tab-overview">
                     <div class="form-section" style="padding: 2rem;">
                         <h3 class="form-section-title">Project Details</h3>
-                        <p><strong>Title:</strong> AI-Based Traffic Management for Manila</p>
-                        <p><strong>Authors:</strong> Santos, J., Reyes, M., Cruz, L.</p>
-                        <p><strong>Status:</strong> <span class="status-badge status-passed">Passed</span></p>
+                        <p><strong>Title:</strong> <span id="modal-display-title">AI-Based Traffic Management for Manila</span></p>
+                        <p><strong>Authors:</strong> <span id="modal-display-authors">Santos, J., Reyes, M., Cruz, L.</span></p>
+                        <p style="margin-top: 1rem;"><strong>Abstract:</strong></p>
+                        <p id="modal-display-abstract" style="line-height: 1.6; color: #555; margin-top: 0.5rem;">Thesis abstract will appear here...</p>
                     </div>
                 </div>
                 <div class="tab-content" id="tab-faculty">
                     <div class="form-section" style="padding: 2rem;">
                         <h3 class="form-section-title">Assigned Faculty</h3>
-                        <p><strong>Main Adviser:</strong> Engr. Dela Cruz</p>
-                    </div>
-                </div>
-                <div class="tab-content" id="tab-history">
-                    <div class="timeline" style="padding: 2rem;">
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-header">
-                                <span class="timeline-semester">Final Defense</span>
-                                <span class="timeline-date">Mar 15, 2026</span>
-                            </div>
-                            <div class="timeline-body">
-                                <p>Result: PASSED</p>
-                            </div>
-                        </div>
+                        <p><strong>Main Adviser:</strong> <span id="modal-display-adviser">Engr. Dela Cruz</span></p>
                     </div>
                 </div>
             </div>
             
             <div style="padding: 1.5rem; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 1rem;">
                 <button class="btn btn-secondary" id="close-modal-btn">Close</button>
-                <button class="btn btn-primary">Save Changes</button>
             </div>
         </div>
     </div>
@@ -394,7 +339,35 @@
         </div>
     </div>
 
+    <!-- Admin Login Modal -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="login-card" style="position: relative; max-width: 400px; width: 100%; margin: 2rem;">
+            <button class="modal-close" id="close-login" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
+            <div style="margin-bottom: 2rem; margin-top: 1rem;">
+                <div style="width: 60px; height: 60px; background: #800000; border-radius: 15px; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+            </div>
+            <h2>Admin Access Required</h2>
+            <p>Please log in to register a new thesis</p>
+            <p style="font-size: 0.75rem; color: #888; margin-top: -1.5rem; margin-bottom: 2rem;">(Hint: admin / 123456)</p>
+            
+            <form id="login-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="e.g., admin" required>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-btn">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
-
