@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
 
-      fetch('http://localhost/Thesis-Management/save_thesis.php', {
+      fetch('http://localhost/Thesis-Management/backend/save_thesis.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!repositoryTableBody) return;
     repositoryTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading database records...</td></tr>';
     
-    fetch('http://localhost/Thesis-Management/fetch_theses.php')
+    fetch('http://localhost/Thesis-Management/backend/fetch_theses.php')
       .then(res => res.json())
       .then(response => {
         if (response.status === 'success') {
