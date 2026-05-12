@@ -48,7 +48,7 @@
     <div id="main-app">
         <!-- Mobile Toggle (Hidden on Desktop) -->
         <button class="mobile-toggle" id="sidebar-toggle">☰</button>
-
+        
         <!-- Sidebar Navigation (Fixed Left) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -65,6 +65,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                     Repository
                 </li>
+
             </ul>
             
             <!-- Fixed Profile Section at Bottom -->
@@ -97,16 +98,16 @@
                 <div class="kpi-grid">
                     <div class="kpi-card">
                         <div class="kpi-label">Total Archived Theses</div>
-                        <div class="kpi-value" id="kpi-total">...</div>
+                        <div class="kpi-value">248</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Theses by Batch (Year)</div>
-                        <div class="kpi-value" id="kpi-batch">...</div>
+                        <div class="kpi-value">8</div>
                         <div style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">Distinct graduation years</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Theses by Section (Block)</div>
-                        <div class="kpi-value" id="kpi-section">...</div>
+                        <div class="kpi-value">16</div>
                         <div style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">Distinct academic sections</div>
                     </div>
                 </div>
@@ -128,9 +129,22 @@
                                     <th>Date Archived</th>
                                 </tr>
                             </thead>
-                            <tbody id="recent-theses-body">
-                                <tr>
-                                    <td colspan="6" style="text-align: center;">Loading data...</td>
+                            <tbody>
+                                <tr class="clickable-row" data-id="g01-2026">
+                                    <td>AI-Based Traffic Management for Manila</td>
+                                    <td>Santos, Reyes, Cruz</td>
+                                    <td>2025-2026</td>
+                                    <td>5-1</td>
+                                    <td><span class="status-badge status-passed">AI</span></td>
+                                    <td>Mar 15, 2026</td>
+                                </tr>
+                                <tr class="clickable-row" data-id="g02-2026">
+                                    <td>IoT Smart Farming in Bulacan</td>
+                                    <td>Perez, Gomez, Lim</td>
+                                    <td>2025-2026</td>
+                                    <td>5-2</td>
+                                    <td><span class="status-badge status-pending">IoT</span></td>
+                                    <td>Mar 14, 2026</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -153,20 +167,16 @@
                             <h3 class="form-section-title">Archive Information</h3>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label class="required-label">Thesis Title</label>
-                                    <input type="text" id="thesis-title" placeholder="e.g., AI-Based Traffic Management for Manila" required>
-                                </div>
-                                <div class="form-group">
                                     <label class="required-label">Group Code</label>
-                                    <input type="text" id="thesis-group-code" placeholder="e.g., CPE-2026-G01" required>
+                                    <input type="text" placeholder="e.g., CPE-2026-G01" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Batch Year</label>
-                                    <input type="text" id="thesis-batch-year" placeholder="e.g., 2025-2026" required>
+                                    <input type="text" placeholder="e.g., 2025-2026" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Section (Block)</label>
-                                    <input type="text" id="thesis-section" placeholder="e.g., 5-1" required>
+                                    <input type="text" placeholder="e.g., 5-1" required>
                                 </div>
                             </div>
                         </div>
@@ -177,11 +187,11 @@
                                 <div class="form-grid" style="margin-bottom: 1rem;">
                                     <div class="form-group">
                                         <label>Author 1 (Leader)</label>
-                                        <input type="text" class="author-name" placeholder="Full Name" required>
+                                        <input type="text" placeholder="Full Name" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Student Number</label>
-                                        <input type="text" class="author-student-number" placeholder="20XX-XXXXX-MN-0" required>
+                                        <input type="text" placeholder="20XX-XXXXX-MN-0" required>
                                     </div>
                                 </div>
                             </div>
@@ -193,7 +203,7 @@
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label class="required-label">Research Type</label>
-                                    <select id="thesis-research-type" class="semester-select" style="width: 100%;" required>
+                                    <select class="semester-select" style="width: 100%;" required>
                                         <option value="">Select Type</option>
                                         <option>Software (Web/App)</option>
                                         <option>Hardware (Only)</option>
@@ -202,7 +212,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Research Topic/Category</label>
-                                    <select id="thesis-research-topic" class="semester-select" style="width: 100%;" required>
+                                    <select class="semester-select" style="width: 100%;" required>
                                         <option value="">Select Topic</option>
                                         <option>AI / Machine Learning</option>
                                         <option>IoT / Embedded Systems</option>
@@ -215,20 +225,12 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Main Adviser</label>
-                                    <select id="thesis-main-adviser" class="semester-select" style="width: 100%;" required>
+                                    <select class="semester-select" style="width: 100%;" required>
                                         <option value="">Select Faculty</option>
                                         <option>Engr. Dela Cruz</option>
                                         <option>Dr. Bautista</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label>Final Panel Members</label>
-                                    <input type="text" id="thesis-panel-members" placeholder="Panel members who signed the approval sheet">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Abstract</label>
-                                <textarea id="thesis-abstract" placeholder="Paste the thesis abstract..." rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; outline: none;"></textarea>
                             </div>
                         </div>
 
@@ -272,9 +274,18 @@
                                     <th>Section</th>
                                 </tr>
                             </thead>
-                            <tbody id="repository-theses-body">
-                                <tr>
-                                    <td colspan="4" style="text-align: center;">Loading data...</td>
+                            <tbody>
+                                <tr class="clickable-row" data-id="g01-2026">
+                                    <td>G01-2025-2026</td>
+                                    <td>AI-Based Traffic Management</td>
+                                    <td>Santos, Reyes, Cruz</td>
+                                    <td>5-1</td>
+                                </tr>
+                                <tr class="clickable-row" data-id="g02-2026">
+                                    <td>G02-2025-2026</td>
+                                    <td>IoT Smart Farming in Bulacan</td>
+                                    <td>Perez, Gomez, Lim</td>
+                                    <td>5-2</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -302,7 +313,7 @@
 
             <div class="modal-body">
                 <div class="tab-content active" id="tab-overview">
-                    <div class="form-section" id="modal-project-details" style="padding: 2rem;">
+                    <div class="form-section" style="padding: 2rem;">
                         <h3 class="form-section-title">Project Details</h3>
                         <p><strong>Title:</strong> <span id="modal-title-val">Loading...</span></p>
                         <p><strong>Authors:</strong> <span id="modal-authors-val">Loading...</span></p>
@@ -311,14 +322,14 @@
                     </div>
                 </div>
                 <div class="tab-content" id="tab-faculty">
-                    <div class="form-section" id="modal-faculty-details" style="padding: 2rem;">
+                    <div class="form-section" style="padding: 2rem;">
                         <h3 class="form-section-title">Advisers & Panel</h3>
                         <p><strong>Adviser:</strong> <span id="modal-adviser-val">Loading...</span></p>
                         <p><strong>Panel:</strong> <span id="modal-panel-val">Loading...</span></p>
                     </div>
                 </div>
                 <div class="tab-content" id="tab-abstract">
-                    <div class="form-section" id="modal-abstract-details" style="padding: 2rem;">
+                    <div class="form-section" style="padding: 2rem;">
                         <h3 class="form-section-title">Abstract</h3>
                         <p id="modal-abstract-val" style="line-height: 1.6; text-align: justify;">Loading abstract...</p>
                     </div>
