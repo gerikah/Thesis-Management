@@ -36,6 +36,12 @@ body {
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(135deg, var(--color-pup-maroon) 0%, var(--color-pup-dark) 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
 }
 
 .login-card {
@@ -131,14 +137,20 @@ body {
   text-align: left;
 }
 
-.sidebar-header h1 {
+.sidebar-header .mobile-toggle {
+  display: none !important;
+}
+
+.sidebar-header h1,
+.navbar-brand h1 {
   font-size: 1.5rem;
   font-weight: 800;
   color: white;
   letter-spacing: 1px;
 }
 
-.sidebar-header p {
+.sidebar-header p,
+.navbar-brand p {
   font-size: 0.7rem;
   color: var(--color-pup-gold);
   text-transform: uppercase;
@@ -149,7 +161,9 @@ body {
 .nav-links {
   flex: 1;
   padding: 1.5rem 0;
-  list-style: none; /* Remove bullet points */
+  list-style: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-item {
@@ -162,18 +176,19 @@ body {
   font-size: 0.95rem;
   color: rgba(255,255,255,0.8);
   font-weight: 500;
+  border-left: 4px solid transparent;
 }
 
 .nav-item:hover {
   background-color: rgba(255,255,255,0.05);
-  color: var(--color-pup-gold); /* Gold hover effect */
+  color: var(--color-pup-gold);
 }
 
 .nav-item.active {
   background-color: rgba(255,255,255,0.1);
   color: var(--color-pup-gold);
   font-weight: 700;
-  border-left: 4px solid var(--color-pup-gold);
+  border-left-color: var(--color-pup-gold);
 }
 
 .sidebar-footer {
@@ -182,7 +197,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: auto; /* Fixed at bottom */
+  margin-top: auto;
 }
 
 .user-avatar {
@@ -233,7 +248,8 @@ body {
 .controls {
   display: flex;
   gap: 1rem;
-  align-items: center; /* Flexbox horizontal row */
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .semester-select {
@@ -278,7 +294,7 @@ body {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4-column CSS Grid */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
 }
@@ -644,7 +660,6 @@ input:checked + .slider:before {
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
   }
   .sidebar.open {
     transform: translateX(0);
@@ -654,7 +669,7 @@ input:checked + .slider:before {
     padding: 1.5rem;
   }
   .mobile-toggle {
-    display: block; /* Show on mobile only */
+    display: block;
     position: fixed;
     top: 1rem;
     left: 1rem;
