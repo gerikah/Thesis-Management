@@ -88,6 +88,8 @@
                     </div>
                     <div class="controls">
                         <div class="quick-actions">
+                            <input type="file" id="csv-upload" accept=".csv" style="display: none;">
+                            <button class="btn btn-secondary" id="btn-import-csv" style="margin-right: 0.5rem;">Import CSV</button>
                             <button class="btn btn-primary" id="btn-new-thesis">+ Archive Thesis</button>
                         </div>
                     </div>
@@ -114,7 +116,6 @@
                 <div class="section-card">
                     <div class="section-header">
                         <h3>Recently Archived Theses</h3>
-                        <button id="btn-view-all" class="btn" style="color: #800000; padding: 0; background: transparent;">View All</button>
                     </div>
                     <div class="table-container">
                         <table>
@@ -123,14 +124,12 @@
                                     <th>Thesis Title</th>
                                     <th>Authors</th>
                                     <th>Batch Year</th>
-                                    <th>Section</th>
-                                    <th>Topic/Category</th>
                                     <th>Date Archived</th>
                                 </tr>
                             </thead>
                             <tbody id="recent-theses-body">
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Loading data...</td>
+                                    <td colspan="4" style="text-align: center;">Loading data...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -157,8 +156,8 @@
                                     <input type="text" id="thesis-title" placeholder="e.g., AI-Based Traffic Management for Manila" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="required-label">Group Code</label>
-                                    <input type="text" id="thesis-group-code" placeholder="e.g., CPE-2026-G01" required>
+                                <label>Group Code</label>
+                                <input type="text" id="thesis-group-code" placeholder="e.g., CPE-2026-G01">
                                 </div>
                                 <div class="form-group">
                                     <label class="required-label">Batch Year</label>
@@ -174,14 +173,14 @@
                         <div class="form-section">
                             <h3 class="form-section-title">Author Assignment</h3>
                             <div id="authors-container">
-                                <div class="form-grid" style="margin-bottom: 1rem;">
+                                <div class="form-grid author-row" style="margin-bottom: 1rem;">
                                     <div class="form-group">
                                         <label>Author 1 (Leader)</label>
                                         <input type="text" class="author-name" placeholder="Full Name" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Student Number</label>
-                                        <input type="text" class="author-student-number" placeholder="20XX-XXXXX-MN-0" required>
+                                    <input type="text" class="author-student-number" placeholder="20XX-XXXXX-MN-0">
                                     </div>
                                 </div>
                             </div>
@@ -191,28 +190,6 @@
                         <div class="form-section">
                             <h3 class="form-section-title">Research Details</h3>
                             <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="required-label">Research Type</label>
-                                    <select id="thesis-research-type" class="semester-select" style="width: 100%;" required>
-                                        <option value="">Select Type</option>
-                                        <option>Software (Web/App)</option>
-                                        <option>Hardware (Only)</option>
-                                        <option>Both</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="required-label">Research Topic/Category</label>
-                                    <select id="thesis-research-topic" class="semester-select" style="width: 100%;" required>
-                                        <option value="">Select Topic</option>
-                                        <option>AI / Machine Learning</option>
-                                        <option>IoT / Embedded Systems</option>
-                                        <option>Robotics</option>
-                                        <option>Cybersecurity</option>
-                                        <option>Cloud Computing</option>
-                                        <option>Web Development</option>
-                                        <option>Other</option>
-                                    </select>
-                                </div>
                                 <div class="form-group">
                                     <label class="required-label">Main Adviser</label>
                                     <select id="thesis-main-adviser" class="semester-select" style="width: 100%;" required>
@@ -227,8 +204,8 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Abstract</label>
-                                <textarea id="thesis-abstract" placeholder="Paste the thesis abstract..." rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; outline: none;"></textarea>
+                            <label class="required-label">Abstract</label>
+                            <textarea id="thesis-abstract" placeholder="Paste the thesis abstract..." rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; outline: none;" required></textarea>
                             </div>
                         </div>
 
@@ -290,38 +267,64 @@
     <div class="modal-overlay" id="workspace-modal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2 id="modal-title">Thesis Workspace</h2>
+                <div style="flex: 1;"><!-- Spacer --></div>
                 <button class="modal-close" id="close-modal">&times;</button>
-            </div>
-            
-            <div class="tabs-nav">
-                <button class="tab-btn active" data-tab="overview">Overview</button>
-                <button class="tab-btn" data-tab="faculty">Advisers & Panel</button>
-                <button class="tab-btn" data-tab="abstract">Abstract</button>
             </div>
 
             <div class="modal-body">
-                <div class="tab-content active" id="tab-overview">
-                    <div class="form-section" id="modal-project-details" style="padding: 2rem;">
-                        <h3 class="form-section-title">Project Details</h3>
-                        <p><strong>Title:</strong> <span id="modal-title-val">Loading...</span></p>
-                        <p><strong>Authors:</strong> <span id="modal-authors-val">Loading...</span></p>
-                        <p><strong>Date Archived:</strong> <span id="modal-date-val">Loading...</span></p>
-                        <p><strong>Group Code:</strong> <span id="modal-group-code-val">Loading...</span></p>
+                <!-- Thesis Title Section -->
+                <div class="thesis-title-section">
+                    <h2 id="modal-title" class="thesis-title-display">Thesis Workspace</h2>
+                </div>
+
+                <div class="modal-content-grid">
+                    <!-- Authors Section -->
+                    <div class="detail-card">
+                        <h4 class="detail-section-label">Authors</h4>
+                        <p id="modal-authors-val" style="color: #333; line-height: 1.6; margin: 0;">Loading...</p>
+                    </div>
+
+                    <!-- Adviser -->
+                    <div class="detail-card">
+                        <h4 class="detail-section-label">Adviser</h4>
+                        <p id="modal-adviser-val" style="color: #333; margin: 0; font-weight: 500;">Loading...</p>
+                    </div>
+
+                    <!-- Panel Members -->
+                    <div class="detail-card">
+                        <h4 class="detail-section-label">Panel Members</h4>
+                        <p id="modal-panel-val" style="color: #333; line-height: 1.6; margin: 0;">Loading...</p>
+                    </div>
+
+                    <!-- Group Code -->
+                    <div class="detail-card">
+                        <h4 class="detail-section-label">Group Code</h4>
+                        <p id="modal-group-code-val" style="color: #333; margin: 0; font-weight: 500;">Loading...</p>
+                    </div>
+
+                    <!-- Section -->
+                    <div class="detail-card">
+                        <h4 class="detail-section-label">Section</h4>
+                        <p id="modal-section-val" style="color: #333; margin: 0; font-weight: 500;">Loading...</p>
+                    </div>
+
+                    <!-- Batch Year -->
+                    <div class="detail-card">
+                        <h4 class="detail-section-label">Batch Year</h4>
+                        <p id="modal-batch-year-val" style="color: #333; margin: 0; font-weight: 500;">Loading...</p>
                     </div>
                 </div>
-                <div class="tab-content" id="tab-faculty">
-                    <div class="form-section" id="modal-faculty-details" style="padding: 2rem;">
-                        <h3 class="form-section-title">Advisers & Panel</h3>
-                        <p><strong>Adviser:</strong> <span id="modal-adviser-val">Loading...</span></p>
-                        <p><strong>Panel:</strong> <span id="modal-panel-val">Loading...</span></p>
-                    </div>
+
+                <!-- Abstract Section (Full Width) -->
+                <div class="abstract-section">
+                    <h3 class="form-section-title">Abstract</h3>
+                    <p id="modal-abstract-val" style="line-height: 1.7; text-align: justify; color: #555; margin: 0; font-size: 0.95rem;">Loading abstract...</p>
                 </div>
-                <div class="tab-content" id="tab-abstract">
-                    <div class="form-section" id="modal-abstract-details" style="padding: 2rem;">
-                        <h3 class="form-section-title">Abstract</h3>
-                        <p id="modal-abstract-val" style="line-height: 1.6; text-align: justify;">Loading abstract...</p>
-                    </div>
+
+                <!-- Date Archived (Bottom) -->
+                <div class="date-archived-footer">
+                    <span class="date-label">Date Archived:</span>
+                    <span id="modal-date-val" style="font-weight: 600; color: var(--color-pup-maroon);">Loading...</span>
                 </div>
             </div>
             
