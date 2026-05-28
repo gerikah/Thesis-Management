@@ -6,6 +6,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('PUP CpE Dashboard Logic Loaded');
   // Elements
+  const authPage = document.getElementById('auth-page');
+  const mainApp = document.getElementById('main-app');
   const loginForm = document.getElementById('login-form');
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const sidebar = document.getElementById('sidebar');
@@ -23,26 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       
       const username = document.getElementById('username') as HTMLInputElement;
-      const password = document.getElementById('password') as HTMLInputElement;
       
-      // Hardcoded check for Admin rights
-      if (username.value === 'admin' && password.value === '123456') {
-        isAuthenticated = true;
-        closeModal('login-modal');
-        
-        // Update UI
-        const avatarEl = document.getElementById('user-avatar-display');
-        if (avatarEl) avatarEl.innerText = 'AD';
-        if (userDisplayName) userDisplayName.innerText = 'Admin User';
-        if (userDisplayRole) userDisplayRole.innerText = 'Thesis Coordinator';
-        
-        // Automatically switch to register view upon successful login
-        const registerNavItem = document.querySelector('[data-view="register"]') as HTMLElement;
-        if (registerNavItem) registerNavItem.click();
-        
-        (loginForm as HTMLFormElement).reset();
-      } else {
-        alert('Invalid credentials. Hint: use admin / 123456');
+      // Only admin/thesis head can add theses
+      const validAdmins = ['admin', 'thesis_head', 'coordinator'];
+      const isAdmin = validAdmins.includes(username.value.toLowerCase());
+      
+      if (!isAdmin) {
+        alert('Access Denied!\nOnly Administrators and Thesis Heads can archive theses.\n\nFor demo purposes, use:\nadmin, thesis_head, or coordinator');
+        return;
       }
       
       // Update UI
@@ -79,12 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     item.addEventListener('click', () => {
       const view = item.getAttribute('data-view');
       
-      // Intercept Register view if user is not authenticated
-      if (view === 'register' && !isAuthenticated) {
-        openModal('login-modal');
-        return;
-      }
-
       // Remove active class from all nav items
       navItems.forEach(nav => nav.classList.remove('active'));
       // Add active class to clicked nav item
@@ -108,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Modal Management
   const workspaceModal = document.getElementById('workspace-modal');
-  const evaluateModal = document.getElementById('evaluate-modal');
   const btnNewThesis = document.getElementById('btn-new-thesis');
   const btnImportCsv = document.getElementById('btn-import-csv');
   const csvUploadInput = document.getElementById('csv-upload') as HTMLInputElement;
@@ -446,8 +429,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // Close modals when clicking overlay
   window.addEventListener('click', (e) => {
     if (e.target === workspaceModal) closeModal('workspace-modal');
-    if (e.target === evaluateModal) closeModal('evaluate-modal');
-    if (e.target === document.getElementById('login-modal')) closeModal('login-modal');
   });
-
 });
