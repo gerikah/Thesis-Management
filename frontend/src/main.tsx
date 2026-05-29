@@ -19,15 +19,31 @@ import {
   LibraryBig,
   List,
   LockKeyhole,
+  PieChart as PieChartIcon,
   Plus,
   Search,
   ShieldCheck,
   Sparkles,
+  TrendingUp,
   Upload,
   UserRound,
   Users,
   X,
 } from 'lucide-react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 
 type Thesis = {
   archive_id: string;
@@ -42,10 +58,10 @@ type Thesis = {
   created_at?: string;
 };
 
-type View = 'dashboard' | 'repository';
+type View = 'dashboard' | 'repository' | 'analytics';
 type LayoutMode = 'grid' | 'table';
 
-const API_BASE = 'http://localhost/Thesis-Management/backend';
+const API_BASE = 'http://localhost/backend';
 const MIN_LOADING_TIME_MS = 2600;
 
 const adviserOptions = [
@@ -253,53 +269,44 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
+    <div className="min-h-screen text-slate-950">
       {isInitialLoading && <LoadingScreen />}
 
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-white/10 bg-[#4b0713] px-4 py-5 text-white shadow-2xl shadow-rose-950/20 lg:flex lg:flex-col">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-maroon-900/10 bg-maroon-gradient px-4 py-5 text-white shadow-2xl shadow-maroon-950/40 lg:flex lg:flex-col">
         <div className="mb-9 flex items-center gap-3 px-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
-            <BookOpen className="h-6 w-6 text-rose-100" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 shadow-inner">
+            <BookOpen className="h-6 w-6 text-maroon-100" />
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight">PUP CpE</h1>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-rose-100/70">Thesis System</p>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-maroon-100/70">Thesis System</p>
           </div>
         </div>
 
         <nav className="space-y-2">
           <NavButton active={view === 'dashboard'} icon={BarChart3} label="Dashboard" onClick={() => setView('dashboard')} />
           <NavButton active={view === 'repository'} icon={Database} label="Repository" onClick={() => setView('repository')} />
+          <NavButton active={view === 'analytics'} icon={TrendingUp} label="Analytics" onClick={() => setView('analytics')} />
         </nav>
-
-        <div className="mt-auto rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-sm font-bold text-[#4b0713]">AD</div>
-            <div>
-              <p className="text-sm font-semibold">Admin Office</p>
-              <p className="text-xs text-rose-100/70">Repository Control</p>
-            </div>
-          </div>
-        </div>
       </aside>
 
-      <main className={`px-4 py-6 sm:px-6 lg:ml-72 lg:px-10 ${view === 'dashboard' ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
-        <header className="mb-8 flex flex-col gap-4 rounded-3xl border border-white bg-white/80 p-5 shadow-sm shadow-slate-200/70 backdrop-blur md:flex-row md:items-center md:justify-between">
+      <main className="min-h-screen px-4 py-6 sm:px-6 lg:ml-72 lg:px-10 pb-20">
+        <header className="mb-8 flex flex-col gap-4 rounded-3xl border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-5 shadow-xl shadow-maroon-900/10 backdrop-blur-xl md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#7f1d1d] ring-1 ring-rose-100">
+            <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-maroon-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-maroon-900 ring-1 ring-maroon-100/50">
               <Sparkles className="h-3.5 w-3.5" />
               Computer Engineering
             </p>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-950">
-              {view === 'dashboard' ? 'Archive Intelligence Dashboard' : 'Digital Thesis Repository'}
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-950">
+              {view === 'dashboard' ? 'Archive Intelligence' : 'Digital Repository'}
             </h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50" onClick={() => setAdminFlowOpen(true)}>
+            <button className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-slate-50 hover:shadow-md active:scale-[0.98]" onClick={() => setAdminFlowOpen(true)}>
               <Upload className="h-4 w-4" />
               Import CSV
             </button>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-[#7f1d1d] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/20 hover:bg-[#681919]" onClick={() => setAdminFlowOpen(true)}>
+            <button className="inline-flex items-center gap-2 rounded-xl bg-maroon-gradient px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-maroon-900/20 transition-all hover:shadow-maroon-900/30 hover:brightness-110 active:scale-[0.98]" onClick={() => setAdminFlowOpen(true)}>
               <Plus className="h-4 w-4" />
               Archive New Thesis
             </button>
@@ -308,7 +315,7 @@ function App() {
 
         {view === 'dashboard' ? (
           <Dashboard metrics={metrics} stats={categoryStats} theses={allTheses} onArchive={() => setAdminFlowOpen(true)} onImport={() => setAdminFlowOpen(true)} />
-        ) : (
+        ) : view === 'repository' ? (
           <Repository
             theses={visibleTheses}
             years={years}
@@ -330,6 +337,8 @@ function App() {
             clearFilters={clearFilters}
             onSelect={setSelectedThesis}
           />
+        ) : (
+          <Analytics theses={allTheses} />
         )}
       </main>
 
@@ -352,48 +361,47 @@ function NavButton({ active, icon: Icon, label, onClick }: { active: boolean; ic
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-        active ? 'bg-white text-[#4b0713] shadow-lg shadow-black/10' : 'text-rose-50/80 hover:bg-white/10 hover:text-white'
+      className={`group relative flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-bold transition-all duration-300 ${
+        active 
+          ? 'bg-white text-maroon-900 shadow-xl shadow-maroon-950/20' 
+          : 'text-maroon-100/70 hover:bg-white/10 hover:text-white'
       }`}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className={`h-5 w-5 transition-transform duration-300 group-hover:scale-110 ${active ? 'text-maroon-800' : ''}`} />
       {label}
+      {active && <div className="absolute right-4 h-1.5 w-1.5 rounded-full bg-maroon-600 shadow-sm" />}
     </button>
   );
 }
 
 function LoadingScreen() {
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[#3b0610] px-6 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(255,255,255,0.14),transparent_28rem),radial-gradient(circle_at_76%_76%,rgba(250,204,21,0.14),transparent_22rem)]" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent" />
+    <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-maroon-950 px-6 text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(255,255,255,0.08),transparent_32rem),radial-gradient(circle_at_76%_76%,rgba(254,226,226,0.08),transparent_28rem)]" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/40 to-transparent" />
 
       <div className="relative flex w-full max-w-3xl flex-col items-center text-center">
-        <div className="mb-7 flex items-center gap-5">
-          <div className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-white p-3 shadow-2xl shadow-black/20 ring-1 ring-white/30">
+        <div className="mb-10 flex justify-center">
+          <div className="flex h-56 w-56 animate-[float_4s_ease-in-out_infinite] items-center justify-center rounded-[3rem] bg-white p-6 shadow-[0_0_60px_rgba(255,255,255,0.25)] ring-1 ring-white/30">
             <img src={projectLogo} alt="Thesis archive project logo" className="h-full w-full object-contain" />
-          </div>
-          <div className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-white/10 shadow-2xl shadow-black/10 ring-1 ring-white/20 backdrop-blur">
-            <div className="text-center">
-              <BookOpen className="mx-auto h-9 w-9 text-rose-100" />
-              <p className="mt-1 text-sm font-extrabold tracking-tight text-white">CpE</p>
-            </div>
           </div>
         </div>
 
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-rose-100/70">Computer Engineering Department</p>
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">Thesis Management System</h1>
-        <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-rose-50/80 sm:text-lg">
+        <p className="mb-4 text-sm font-black uppercase tracking-[0.4em] text-maroon-200/60">Computer Engineering Department</p>
+        <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+          Thesis Management <span className="text-maroon-200">System</span>
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-maroon-50/70 sm:text-xl">
           The Definitive Archive of Computer Engineering Innovation
         </p>
 
-        <div className="mt-9 w-full max-w-sm">
-          <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[0.16em] text-rose-100/60">
+        <div className="mt-12 w-full max-w-sm">
+          <div className="mb-4 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-maroon-200/40">
             <span>Preparing repository</span>
             <span>Secure archive</span>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/10">
-            <div className="h-full w-1/2 animate-[loading-slide_1.35s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-rose-100 via-amber-200 to-rose-100" />
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+            <div className="h-full w-1/2 animate-[loading-slide_1.5s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-maroon-200 via-white to-maroon-200" />
           </div>
         </div>
       </div>
@@ -406,73 +414,98 @@ function Dashboard({ metrics, stats, theses, onArchive, onImport }: any) {
   const latest = recent[0];
 
   return (
-    <div className="grid h-[calc(100vh-9rem)] grid-rows-[auto_1fr_1.05fr] gap-4 overflow-hidden">
-      <section className="grid gap-4 md:grid-cols-3">
+    <div className="flex flex-col gap-8">
+      <section className="grid gap-6 md:grid-cols-3">
         {metrics.map((metric: any) => (
-          <div key={metric.label} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70">
-            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-rose-50" />
-            <div className="relative mb-4 flex items-center justify-between">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ${metric.accent}`}>
-                <metric.icon className="h-6 w-6" />
+          <div key={metric.label} className="group relative overflow-hidden rounded-[2rem] border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-7 shadow-xl shadow-maroon-900/10 backdrop-blur-xl transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-maroon-900/10">
+            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-maroon-50/50 transition-transform duration-500 group-hover:scale-110" />
+            <div className="relative mb-6 flex items-center justify-between">
+              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 ${metric.accent}`}>
+                <metric.icon className="h-7 w-7" />
+              </div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-300">
+                <ChevronRight className="h-4 w-4" />
               </div>
             </div>
-            <p className="relative text-sm font-medium text-slate-500">{metric.label}</p>
-            <p className="relative mt-1 text-4xl font-bold tracking-tight text-slate-950">{metric.value}</p>
+            <p className="relative text-sm font-bold uppercase tracking-widest text-slate-400">{metric.label}</p>
+            <p className="relative mt-2 text-5xl font-black tracking-tight text-slate-950">{metric.value}</p>
           </div>
         ))}
       </section>
 
-      <section className="grid min-h-0 gap-4 xl:grid-cols-[1.45fr_0.75fr]">
-        <div className="flex min-h-0 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-          <div className="mb-4 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.45fr_0.75fr]">
+        <div className="flex flex-col rounded-[2rem] border border-white bg-gradient-to-br from-white/90 to-slate-200/60 p-8 shadow-xl shadow-maroon-900/10 backdrop-blur-md">
+          <div className="mb-8 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-slate-950">Theses by Technology Category</h3>
-              <p className="text-sm text-slate-500">Classification inferred from thesis titles and abstracts.</p>
+              <h3 className="text-2xl font-black tracking-tight text-slate-950">Technology Landscape</h3>
+              <p className="mt-1 text-sm font-medium text-slate-500">Distribution of innovation categories across the archive.</p>
             </div>
-            <Archive className="h-5 w-5 text-[#7f1d1d]" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon-50 text-maroon-900 ring-1 ring-maroon-100">
+              <Archive className="h-6 w-6" />
+            </div>
           </div>
-          <div className="grid flex-1 gap-4 md:grid-cols-2">
+          <div className="grid flex-1 gap-6 md:grid-cols-2">
             {stats.map((category: any) => (
-              <div key={category.label} className="flex flex-col justify-center rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="font-semibold text-slate-800">{category.label}</span>
-                  <span className="text-sm font-bold text-slate-500">{category.count}</span>
+              <div key={category.label} className="group flex flex-col justify-center rounded-3xl bg-slate-50/50 p-5 ring-1 ring-slate-100 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-lg font-bold text-slate-800">{category.label}</span>
+                  <span className="rounded-lg bg-white px-2 py-1 text-xs font-black text-slate-400 shadow-sm ring-1 ring-slate-100">{category.count}</span>
                 </div>
-                <div className="h-4 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-                  <div className={`h-full rounded-full ${category.color}`} style={{ width: `${category.percentage}%` }} />
+                <div className="h-3 overflow-hidden rounded-full bg-slate-200/50 ring-1 ring-slate-200/50">
+                  <div className={`h-full rounded-full transition-all duration-1000 ${category.color} shadow-[0_0_12px_rgba(0,0,0,0.1)]`} style={{ width: `${category.percentage}%` }} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-          <h3 className="mb-4 text-lg font-bold text-slate-950">Admin Quick Actions</h3>
-          <div className="grid gap-3">
-            <button onClick={onImport} className="flex items-center justify-between rounded-2xl bg-[#7f1d1d] px-4 py-3 text-left font-semibold text-white shadow-lg shadow-rose-900/20">
-              <span className="inline-flex items-center gap-3"><Upload className="h-5 w-5" />Import CSV</span>
-              <ChevronRight className="h-5 w-5" />
-            </button>
-            <button onClick={onArchive} className="flex items-center justify-between rounded-2xl bg-slate-950 px-4 py-3 text-left font-semibold text-white">
-              <span className="inline-flex items-center gap-3"><FileArchive className="h-5 w-5" />Archive New Thesis</span>
-              <ChevronRight className="h-5 w-5" />
-            </button>
+        <div className="flex flex-col gap-6">
+          <div className="rounded-[2rem] border border-white bg-gradient-to-br from-white/90 to-slate-200/60 p-7 shadow-xl shadow-maroon-900/10 backdrop-blur-md">
+            <h3 className="mb-5 text-xl font-black tracking-tight text-slate-950">Quick Operations</h3>
+            <div className="grid gap-3">
+              <button onClick={onImport} className="flex items-center justify-between rounded-2xl bg-maroon-gradient px-5 py-4 text-left font-bold text-white shadow-lg shadow-maroon-900/20 transition-all hover:brightness-110 active:scale-[0.98]">
+                <span className="inline-flex items-center gap-3"><Upload className="h-5 w-5" /> Bulk Import CSV</span>
+                <ChevronRight className="h-5 w-5 opacity-50" />
+              </button>
+              <button onClick={onArchive} className="flex items-center justify-between rounded-2xl bg-slate-950 px-5 py-4 text-left font-bold text-white transition-all hover:bg-slate-800 active:scale-[0.98]">
+                <span className="inline-flex items-center gap-3"><Plus className="h-5 w-5" /> Manual Archive</span>
+                <ChevronRight className="h-5 w-5 opacity-50" />
+              </button>
+            </div>
           </div>
-          <div className="mt-4 flex flex-1 flex-col justify-end rounded-3xl bg-slate-950 p-5 text-white">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-100/70">Latest Archive</p>
-            <h4 className="mt-3 line-clamp-3 text-lg font-bold leading-snug">{latest?.thesis_title || 'No archive records yet'}</h4>
-            <p className="mt-3 text-sm text-white/60">{latest ? `${latest.batch_year || 'No batch'} / ${latest.section_block || 'No section'}` : 'Import or archive a thesis to begin.'}</p>
+          
+          <div className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-[2rem] bg-maroon-950 p-7 text-white shadow-2xl shadow-maroon-950/40">
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-maroon-900/30 blur-3xl" />
+            <div className="relative">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-maroon-200/60">Recently Ingested</p>
+              <h4 className="mt-4 line-clamp-3 text-xl font-black leading-tight tracking-tight">{latest?.thesis_title || 'Awaiting first archive record...'}</h4>
+              <div className="mt-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20">
+                  <GraduationCap className="h-5 w-5 text-maroon-100" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-maroon-100">{latest?.batch_year || 'N/A'}</p>
+                  <p className="text-[10px] font-medium text-maroon-100/50 uppercase tracking-wider">{latest?.section_block || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="min-h-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-        <h3 className="mb-4 text-lg font-bold text-slate-950">Recent Archives</h3>
-        <div className="grid h-[calc(100%-2.75rem)] gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <section className="rounded-[2rem] border border-white bg-gradient-to-br from-white/90 to-slate-200/60 p-8 shadow-xl shadow-maroon-900/10 backdrop-blur-md">
+        <div className="mb-6 flex items-center justify-between">
+          <h3 className="text-2xl font-black tracking-tight text-slate-950">Recent History</h3>
+          <button className="text-sm font-bold text-maroon-900 hover:underline">View all activity</button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recent.map((thesis: Thesis) => (
-            <div key={thesis.archive_id} className="flex flex-col justify-between rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-              <p className="line-clamp-2 font-semibold text-slate-900">{thesis.thesis_title}</p>
-              <p className="mt-2 text-sm text-slate-500">{dateLabel(thesis.created_at)} / {thesis.batch_year || 'No batch'}</p>
+            <div key={thesis.archive_id} className="group flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-md hover:ring-maroon-100">
+              <p className="line-clamp-2 text-sm font-bold leading-relaxed text-slate-800 group-hover:text-maroon-950">{thesis.thesis_title}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{dateLabel(thesis.created_at)}</p>
+                <span className="rounded-lg bg-slate-50 px-2 py-1 text-[10px] font-black text-slate-500 ring-1 ring-slate-100">{thesis.batch_year || 'N/A'}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -483,36 +516,42 @@ function Dashboard({ metrics, stats, theses, onArchive, onImport }: any) {
 
 function Repository(props: any) {
   return (
-    <div className="space-y-6">
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+    <div className="space-y-8">
+      <section className="rounded-[2rem] border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-6 shadow-xl shadow-maroon-900/10 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
               value={props.searchTerm}
               onChange={(event) => props.setSearchTerm(event.target.value)}
-              className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-medium outline-none transition focus:border-[#7f1d1d] focus:bg-white focus:ring-4 focus:ring-rose-100"
-              placeholder="Search by thesis title or keyword..."
+              className="h-14 w-full rounded-2xl border border-slate-200 bg-white/50 pl-14 pr-6 text-sm font-bold text-slate-950 outline-none transition placeholder:font-medium placeholder:text-slate-400 focus:border-maroon-900 focus:bg-white focus:ring-4 focus:ring-maroon-100"
+              placeholder="Query the repository by title, author, or research keyword..."
             />
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => props.setFiltersOpen(!props.filtersOpen)} className="inline-flex h-12 items-center gap-2 rounded-2xl bg-[#7f1d1d] px-4 text-sm font-semibold text-white shadow-lg shadow-rose-900/15">
-              <Filter className="h-4 w-4" /> Filter
+          <div className="flex gap-3">
+            <button 
+              onClick={() => props.setFiltersOpen(!props.filtersOpen)} 
+              className={`inline-flex h-14 items-center gap-2 rounded-2xl px-6 text-sm font-black transition-all ${
+                props.filtersOpen ? 'bg-slate-950 text-white shadow-lg' : 'bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <Filter className="h-4 w-4" /> 
+              {props.filtersOpen ? 'Clear Filters' : 'Filter'}
             </button>
-            <div className="flex rounded-2xl bg-slate-100 p-1 ring-1 ring-slate-200">
-              <button onClick={() => props.setLayoutMode('grid')} className={`rounded-xl p-2.5 ${props.layoutMode === 'grid' ? 'bg-white text-[#7f1d1d] shadow-sm' : 'text-slate-500'}`}><Grid3X3 className="h-4 w-4" /></button>
-              <button onClick={() => props.setLayoutMode('table')} className={`rounded-xl p-2.5 ${props.layoutMode === 'table' ? 'bg-white text-[#7f1d1d] shadow-sm' : 'text-slate-500'}`}><List className="h-4 w-4" /></button>
+            <div className="flex rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200">
+              <button onClick={() => props.setLayoutMode('grid')} className={`rounded-xl p-2.5 transition-all ${props.layoutMode === 'grid' ? 'bg-maroon-gradient text-white shadow-lg shadow-maroon-900/20' : 'text-slate-400 hover:text-slate-600'}`}><Grid3X3 className="h-5 w-5" /></button>
+              <button onClick={() => props.setLayoutMode('table')} className={`rounded-xl p-2.5 transition-all ${props.layoutMode === 'table' ? 'bg-maroon-gradient text-white shadow-lg shadow-maroon-900/20' : 'text-slate-400 hover:text-slate-600'}`}><List className="h-5 w-5" /></button>
             </div>
           </div>
         </div>
 
         {props.filtersOpen && (
-          <div className="mt-5 grid gap-3 border-t border-slate-100 pt-5 md:grid-cols-2 xl:grid-cols-5">
-            <FilterSelect label="Batch" value={props.selectedYear} onChange={props.setSelectedYear} options={props.years} fallback="All Batches" />
-            <FilterSelect label="Adviser" value={props.selectedAdviser} onChange={props.setSelectedAdviser} options={adviserOptions} fallback="All Advisers" />
-            <FilterSelect label="Section" value={props.selectedSection} onChange={props.setSelectedSection} options={props.sections} fallback="All Sections" />
-            <FilterSelect label="Tech Stack" value={props.selectedTech} onChange={props.setSelectedTech} options={['IoT', 'Robotics', 'AI/ML', 'Software', 'Python', 'Hardware', 'Web App', 'Mobile']} fallback="All Tech" />
-            <button onClick={props.clearFilters} className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">Clear Filters</button>
+          <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 md:grid-cols-2 xl:grid-cols-5">
+            <FilterSelect label="Batch Year" value={props.selectedYear} onChange={props.setSelectedYear} options={props.years} fallback="All Batches" />
+            <FilterSelect label="Lead Adviser" value={props.selectedAdviser} onChange={props.setSelectedAdviser} options={adviserOptions} fallback="All Advisers" />
+            <FilterSelect label="Academic Section" value={props.selectedSection} onChange={props.setSelectedSection} options={props.sections} fallback="All Sections" />
+            <FilterSelect label="Tech Category" value={props.selectedTech} onChange={props.setSelectedTech} options={['IoT', 'Robotics', 'AI/ML', 'Software', 'Python', 'Hardware', 'Web App', 'Mobile']} fallback="All Technology" />
+            <button onClick={props.clearFilters} className="mt-auto h-12 rounded-2xl bg-slate-950 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-slate-800">Reset All</button>
           </div>
         )}
       </section>
@@ -531,8 +570,12 @@ function Repository(props: any) {
 function FilterSelect({ label, value, onChange, options, fallback }: any) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</span>
-      <select value={value} onChange={event => onChange(event.target.value)} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 outline-none focus:border-[#7f1d1d] focus:ring-4 focus:ring-rose-100">
+      <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
+      <select 
+        value={value} 
+        onChange={event => onChange(event.target.value)} 
+        className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 outline-none transition focus:border-maroon-900 focus:ring-4 focus:ring-maroon-100"
+      >
         <option value="">{fallback}</option>
         {options.map((option: string) => <option key={option} value={option}>{option}</option>)}
       </select>
@@ -545,20 +588,39 @@ function ThesisCard({ thesis, onSelect }: { thesis: Thesis; onSelect: (thesis: T
   const badges = getTechBadges(thesis);
 
   return (
-    <button onClick={() => onSelect(thesis)} className="group rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm shadow-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200">
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-[#7f1d1d] ring-1 ring-rose-100">{thesis.batch_year || 'No batch'}</span>
-        <BookOpen className="h-5 w-5 text-slate-300 transition group-hover:text-[#7f1d1d]" />
+    <button 
+      onClick={() => onSelect(thesis)} 
+      className="group flex flex-col rounded-[2rem] border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-7 text-left shadow-xl shadow-maroon-900/10 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:from-white hover:to-slate-50 hover:shadow-2xl hover:shadow-maroon-900/15 hover:ring-1 hover:ring-maroon-200"
+    >
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <span className="rounded-xl bg-maroon-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-maroon-900 ring-1 ring-maroon-100">
+          Batch {thesis.batch_year || 'N/A'}
+        </span>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-300 transition-colors group-hover:bg-maroon-50 group-hover:text-maroon-600">
+          <BookOpen className="h-5 w-5" />
+        </div>
       </div>
-      <h3 className="line-clamp-3 min-h-[4.5rem] text-lg font-bold leading-snug text-slate-950">{thesis.thesis_title}</h3>
-      <p className="mt-4 text-sm font-medium text-slate-500">{authors.length ? authors.slice(0, 2).join(', ') : 'No authors listed'}{authors.length > 2 ? ' et al.' : ''}</p>
-      <div className="mt-5 grid gap-2 text-sm">
-        <p className="text-slate-500"><span className="font-semibold text-slate-700">Adviser:</span> {thesis.main_adviser || 'Unassigned'}</p>
-        <p className="text-slate-500"><span className="font-semibold text-slate-700">Section:</span> {thesis.section_block || 'N/A'}</p>
+      
+      <h3 className="line-clamp-3 min-h-[4.5rem] text-lg font-black leading-tight tracking-tight text-slate-950 group-hover:text-maroon-950">
+        {thesis.thesis_title}
+      </h3>
+      
+      <div className="mt-6 space-y-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <Users className="h-3.5 w-3.5 text-slate-400" />
+          <p className="truncate">{authors.length ? authors.slice(0, 2).join(', ') : 'No authors listed'}{authors.length > 2 ? ' et al.' : ''}</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <UserRound className="h-3.5 w-3.5 text-slate-400" />
+          <p className="truncate">{thesis.main_adviser || 'Unassigned Adviser'}</p>
+        </div>
       </div>
-      <div className="mt-5 flex flex-wrap gap-2">
+
+      <div className="mt-7 flex flex-wrap gap-2">
         {badges.map((badge, index) => (
-          <span key={badge} className={`rounded-full px-3 py-1 text-xs font-bold ring-1 ${badgePalette[index % badgePalette.length]}`}>{badge}</span>
+          <span key={badge} className={`rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ring-1 ${badgePalette[index % badgePalette.length]}`}>
+            {badge}
+          </span>
         ))}
       </div>
     </button>
@@ -567,34 +629,46 @@ function ThesisCard({ thesis, onSelect }: { thesis: Thesis; onSelect: (thesis: T
 
 function ThesisTable({ theses, onSelect }: { theses: Thesis[]; onSelect: (thesis: Thesis) => void }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70">
-      <table className="w-full border-collapse text-left">
-        <thead className="bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-          <tr>
-            <th className="px-5 py-4">Title</th>
-            <th className="px-5 py-4">Batch</th>
-            <th className="px-5 py-4">Authors</th>
-            <th className="px-5 py-4">Section</th>
-            <th className="px-5 py-4">Technology</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {theses.map(thesis => {
-            const authors = getAuthors(thesis);
-            const authorLabel = authors.length ? `${authors[0]}${authors.length > 1 ? ' et al.' : ''}` : 'No authors listed';
+    <div className="overflow-hidden rounded-[2rem] border border-white bg-gradient-to-br from-white/90 to-slate-200/60 shadow-xl shadow-maroon-900/10 backdrop-blur-md">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left">
+          <thead className="bg-slate-50/50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+            <tr>
+              <th className="whitespace-nowrap px-8 py-5">Intellectual Property / Title</th>
+              <th className="whitespace-nowrap px-8 py-5 text-center">Batch</th>
+              <th className="whitespace-nowrap px-8 py-5">Key Contributors</th>
+              <th className="whitespace-nowrap px-8 py-5">Classification</th>
+              <th className="whitespace-nowrap px-8 py-5 text-right">Context</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {theses.map(thesis => {
+              const authors = getAuthors(thesis);
+              const authorLabel = authors.length ? `${authors[0]}${authors.length > 1 ? ' et al.' : ''}` : 'No authors';
 
-            return (
-              <tr key={thesis.archive_id} onClick={() => onSelect(thesis)} className="cursor-pointer hover:bg-rose-50/40">
-                <td className="max-w-xl px-5 py-4 font-semibold text-slate-900">{thesis.thesis_title}</td>
-                <td className="px-5 py-4 text-sm text-slate-600">{thesis.batch_year || 'N/A'}</td>
-                <td className="px-5 py-4 text-sm font-medium text-slate-700">{authorLabel}</td>
-                <td className="px-5 py-4 text-sm text-slate-600">{thesis.section_block || 'N/A'}</td>
-                <td className="px-5 py-4"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{getTechBadges(thesis)[0]}</span></td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr key={thesis.archive_id} onClick={() => onSelect(thesis)} className="group cursor-pointer transition-colors hover:bg-maroon-50/30">
+                  <td className="px-8 py-5">
+                    <p className="line-clamp-1 text-sm font-bold text-slate-900 group-hover:text-maroon-900 transition-colors">{thesis.thesis_title}</p>
+                  </td>
+                  <td className="px-8 py-5 text-center">
+                    <span className="inline-block rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-500 group-hover:bg-white group-hover:shadow-sm">{thesis.batch_year || 'N/A'}</span>
+                  </td>
+                  <td className="px-8 py-5 text-xs font-bold text-slate-600">{authorLabel}</td>
+                  <td className="px-8 py-5">
+                    <span className="rounded-lg bg-maroon-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-maroon-900 ring-1 ring-maroon-100">
+                      {getTechBadges(thesis)[0]}
+                    </span>
+                  </td>
+                  <td className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    {thesis.section_block || 'N/A'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -605,46 +679,61 @@ function ThesisModal({ thesis, onClose }: { thesis: Thesis; onClose: () => void 
   const keywords = getKeywords(thesis);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-md">
-      <div className="max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-950/20">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
-            <BookOpen className="h-4 w-4 text-[#7f1d1d]" />
-            Thesis Detail
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-maroon-950/40 p-4 backdrop-blur-lg">
+      <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[3rem] border border-white/40 bg-gradient-to-br from-white to-slate-100 shadow-[0_0_80px_rgba(69,10,10,0.25)]">
+        <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon-gradient text-white shadow-lg shadow-maroon-900/20">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Archive Record Detail</h3>
+              <p className="text-xs font-bold text-maroon-900">Digital ID: {thesis.archive_id || 'RE-001'}</p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all hover:bg-maroon-100 hover:text-maroon-900 active:scale-95"
           >
-            <X className="h-4 w-4" />
-            Close
+            <X className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="grid max-h-[calc(92vh-73px)] overflow-y-auto lg:grid-cols-[minmax(0,1fr)_360px]">
-          <article className="p-6 sm:p-8 lg:p-10">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#7f1d1d] ring-1 ring-rose-100">
-              <FileText className="h-3.5 w-3.5" />
-              Archived Research
-            </p>
-            <h2 className="max-w-4xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">
-              {thesis.thesis_title || 'Untitled Thesis'}
+        <div className="grid max-h-[calc(94vh-100px)] overflow-y-auto lg:grid-cols-[1fr_400px]">
+          <article className="p-8 sm:p-12 lg:p-16">
+            <div className="mb-8 flex flex-wrap gap-3">
+              <p className="inline-flex items-center gap-2 rounded-xl bg-maroon-50 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-maroon-900 ring-1 ring-maroon-100">
+                <FileText className="h-4 w-4" />
+                Verified Research
+              </p>
+              <p className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                <Database className="h-4 w-4" />
+                Master Archive
+              </p>
+            </div>
+
+            <h2 className="text-4xl font-black leading-[1.15] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+              {thesis.thesis_title || 'Untitled Academic Study'}
             </h2>
 
-            <section className="mt-10">
-              <h3 className="mb-4 text-lg font-bold text-slate-950">Abstract</h3>
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-                <p className="whitespace-pre-line text-base leading-8 text-slate-700">
-                  {thesis.abstract || 'No abstract has been provided for this archived thesis.'}
+            <section className="mt-16">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="h-px flex-1 bg-slate-200" />
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Executive Abstract</h3>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+              <div className="relative rounded-[2.5rem] bg-slate-50/50 p-10 ring-1 ring-slate-100">
+                <p className="relative z-10 whitespace-pre-line text-lg font-medium leading-relaxed text-slate-700 italic">
+                  "{thesis.abstract || 'No abstract record available for this repository entry.'}"
                 </p>
               </div>
             </section>
 
-            <section className="mt-8">
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-slate-400">Keywords</h3>
-              <div className="flex flex-wrap gap-2">
+            <section className="mt-12">
+              <h3 className="mb-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Research Indicators</h3>
+              <div className="flex flex-wrap gap-3">
                 {keywords.map((keyword, index) => (
-                  <span key={keyword} className={`rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${badgePalette[index % badgePalette.length]}`}>
+                  <span key={keyword} className={`rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-widest ring-1 ${badgePalette[index % badgePalette.length]}`}>
                     {keyword}
                   </span>
                 ))}
@@ -652,52 +741,62 @@ function ThesisModal({ thesis, onClose }: { thesis: Thesis; onClose: () => void 
             </section>
           </article>
 
-          <aside className="border-t border-slate-100 bg-slate-50/80 p-6 sm:p-8 lg:border-l lg:border-t-0">
-            <div className="sticky top-0 rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/80 backdrop-blur">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#7f1d1d] text-white">
-                  <GraduationCap className="h-5 w-5" />
+          <aside className="border-t border-slate-100 bg-slate-50/50 p-8 sm:p-12 lg:border-l lg:border-t-0">
+            <div className="sticky top-0 flex flex-col gap-8">
+              <div className="rounded-[2.5rem] border border-white bg-white/80 p-8 shadow-2xl shadow-maroon-900/10 backdrop-blur-md">
+                <div className="mb-8 flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-maroon-gradient text-white shadow-xl shadow-maroon-900/20">
+                    <GraduationCap className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black tracking-tight text-slate-950">Academic Meta</h3>
+                    <p className="text-xs font-bold text-slate-400">Registry classification</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-950">Thesis Metadata</h3>
-                  <p className="text-sm text-slate-500">Academic record summary</p>
-                </div>
-              </div>
 
-              <MetadataSection title="Authors">
-                <div className="space-y-3">
-                  {(authors.length ? authors : ['No authors listed']).map(author => (
-                    <div key={author} className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                        <UserRound className="h-4 w-4" />
-                      </span>
-                      <span className="text-sm font-semibold text-slate-800">{author}</span>
+                <div className="space-y-8">
+                  <MetadataSection title="Core Research Team">
+                    <div className="space-y-4">
+                      {(authors.length ? authors : ['Record Missing']).map(author => (
+                        <div key={author} className="flex items-center gap-4">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm ring-1 ring-slate-100">
+                            <UserRound className="h-5 w-5" />
+                          </div>
+                          <span className="text-sm font-black tracking-tight text-slate-800">{author}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </MetadataSection>
+                  </MetadataSection>
 
-              <MetadataSection title="Adviser & Panel Members">
-                <div className="space-y-3">
-                  <AcademicPerson label="Adviser" name={thesis.main_adviser || 'Unassigned'} />
-                  {(panelMembers.length ? panelMembers : ['No panel members recorded']).map(panel => (
-                    <AcademicPerson key={panel} label="Panel" name={panel} muted={!panelMembers.length} />
-                  ))}
-                </div>
-              </MetadataSection>
+                  <MetadataSection title="Academic Oversight">
+                    <div className="space-y-5">
+                      <AcademicPerson label="Principal Adviser" name={thesis.main_adviser || 'Unassigned'} />
+                      <div className="h-px bg-slate-100" />
+                      {(panelMembers.length ? panelMembers : ['Panel Unrecorded']).map(panel => (
+                        <AcademicPerson key={panel} label="Panel Member" name={panel} muted={!panelMembers.length} />
+                      ))}
+                    </div>
+                  </MetadataSection>
 
-              <MetadataSection title="Academic Context">
-                <div className="grid grid-cols-2 gap-3">
-                  <ContextTile label="Batch" value={thesis.batch_year || 'N/A'} />
-                  <ContextTile label="Section" value={thesis.section_block || 'N/A'} />
-                  <ContextTile label="Group" value={thesis.group_code || 'N/A'} wide />
+                  <MetadataSection title="Repository Context">
+                    <div className="grid grid-cols-2 gap-4">
+                      <ContextTile label="Archive Year" value={thesis.batch_year || 'N/A'} />
+                      <ContextTile label="Section" value={thesis.section_block || 'N/A'} />
+                      <ContextTile label="Group Code" value={thesis.group_code || 'N/A'} wide />
+                    </div>
+                  </MetadataSection>
                 </div>
-              </MetadataSection>
 
-              <div className="mt-5 flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500 ring-1 ring-slate-100">
-                <CalendarDays className="h-4 w-4" />
-                <span>Date archived: <strong className="font-semibold text-slate-700">{dateLabel(thesis.created_at)}</strong></span>
+                <div className="mt-8 flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-4 text-xs font-bold text-maroon-100 shadow-xl">
+                  <CalendarDays className="h-5 w-5 opacity-60" />
+                  <span>Registry Entry: {dateLabel(thesis.created_at)}</span>
+                </div>
               </div>
+              
+              <button className="flex h-16 w-full items-center justify-center gap-3 rounded-3xl bg-maroon-gradient text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-maroon-900/20 transition-all hover:scale-[1.02] active:scale-95">
+                <FileArchive className="h-5 w-5" />
+                Request Document Access
+              </button>
             </div>
           </aside>
         </div>
@@ -708,8 +807,8 @@ function ThesisModal({ thesis, onClose }: { thesis: Thesis; onClose: () => void 
 
 function MetadataSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-t border-slate-100 py-5 first:border-t-0 first:pt-0">
-      <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{title}</h4>
+    <section>
+      <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{title}</h4>
       {children}
     </section>
   );
@@ -717,13 +816,13 @@ function MetadataSection({ title, children }: { title: string; children: React.R
 
 function AcademicPerson({ label, name, muted }: { label: string; name: string; muted?: boolean }) {
   return (
-    <div className="flex gap-3">
-      <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-rose-50 text-[#7f1d1d]">
-        <GraduationCap className="h-4 w-4" />
-      </span>
+    <div className="flex gap-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-maroon-50 text-maroon-900 shadow-sm ring-1 ring-maroon-100">
+        <GraduationCap className="h-5 w-5" />
+      </div>
       <div>
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-        <p className={`text-sm font-semibold ${muted ? 'text-slate-400' : 'text-slate-800'}`}>{name}</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+        <p className={`text-sm font-black tracking-tight ${muted ? 'text-slate-300' : 'text-slate-900'}`}>{name}</p>
       </div>
     </div>
   );
@@ -731,9 +830,9 @@ function AcademicPerson({ label, name, muted }: { label: string; name: string; m
 
 function ContextTile({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
   return (
-    <div className={`rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-100 ${wide ? 'col-span-2' : ''}`}>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-bold text-slate-900">{value}</p>
+    <div className={`rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100/50 ${wide ? 'col-span-2' : ''}`}>
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mt-1.5 text-sm font-black tracking-tight text-slate-900">{value}</p>
     </div>
   );
 }
@@ -749,7 +848,7 @@ function AdminArchiveFlow({ form, setForm, isSaving, onClose, onSubmit, onImport
     const validAdmins = ['admin', 'thesis_head', 'coordinator'];
 
     if (!validAdmins.includes(credentials.username.toLowerCase()) || !credentials.password.trim()) {
-      setAuthError('Use an authorized admin, thesis head, or coordinator account.');
+      setAuthError('Identity verification failed. Please use authorized credentials.');
       return;
     }
 
@@ -758,72 +857,70 @@ function AdminArchiveFlow({ form, setForm, isSaving, onClose, onSubmit, onImport
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-md">
-      <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-950/20">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#7f1d1d] text-white">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-maroon-950/40 p-4 backdrop-blur-lg">
+      <div className="w-full max-w-5xl overflow-hidden rounded-[3rem] border border-white/40 bg-gradient-to-br from-white to-slate-100 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
             <div>
-              <h3 className="font-bold text-slate-950">Administrative Archiving</h3>
-              <p className="text-sm text-slate-500">{authenticated ? 'Choose an archive method' : 'Authentication required'}</p>
+              <h3 className="text-xl font-black tracking-tight text-slate-950">Administrative Control</h3>
+              <p className="text-xs font-bold text-slate-400">{authenticated ? 'Repository write access granted' : 'Authorization protocol required'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-2xl bg-slate-100 p-2 text-slate-600 transition hover:bg-slate-200">
-            <X className="h-5 w-5" />
+          <button onClick={onClose} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition-all hover:bg-maroon-100 hover:text-maroon-900 active:scale-95">
+            <X className="h-6 w-6" />
           </button>
         </div>
 
         {!authenticated ? (
-          <form onSubmit={submitAuth} className="mx-auto max-w-md p-8">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-[#7f1d1d] ring-1 ring-rose-100">
-                <LockKeyhole className="h-6 w-6" />
+          <form onSubmit={submitAuth} className="mx-auto max-w-md p-12">
+            <div className="mb-10 text-center">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-maroon-gradient text-white shadow-xl shadow-maroon-900/20">
+                <LockKeyhole className="h-7 w-7" />
               </div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-slate-950">Admin Authentication</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Verify administrative privileges before modifying repository records.</p>
+              <h2 className="text-3xl font-black tracking-tight text-slate-950">Secure Login</h2>
+              <p className="mt-2 text-sm font-medium text-slate-500">Access restricted to authorized department personnel.</p>
             </div>
 
-            <div className="space-y-4">
-              <Input label="Username" value={credentials.username} onChange={(value: string) => setCredentials({ ...credentials, username: value })} required />
+            <div className="space-y-5">
+              <Input label="Admin Identifier" value={credentials.username} onChange={(value: string) => setCredentials({ ...credentials, username: value })} required />
               <label className="block">
-                <span className="mb-1.5 block text-sm font-semibold text-slate-700">Password</span>
+                <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400">Security Phrase</span>
                 <input
                   type="password"
                   value={credentials.password}
                   onChange={event => setCredentials({ ...credentials, password: event.target.value })}
                   required
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 outline-none focus:border-[#7f1d1d] focus:ring-4 focus:ring-rose-100"
+                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-bold text-slate-950 outline-none transition focus:border-maroon-900 focus:bg-white focus:ring-4 focus:ring-maroon-100"
                 />
               </label>
             </div>
-            {authError && <p className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 ring-1 ring-rose-100">{authError}</p>}
-            <button type="submit" className="mt-6 w-full rounded-2xl bg-[#7f1d1d] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20">
-              Unlock Administrative Tools
+            {authError && <p className="mt-6 rounded-2xl bg-maroon-50 px-5 py-4 text-xs font-bold text-maroon-900 ring-1 ring-maroon-100">{authError}</p>}
+            <button type="submit" className="mt-10 h-14 w-full rounded-2xl bg-maroon-gradient text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-maroon-900/20 transition-all hover:scale-[1.02] active:scale-95">
+              Verify Credentials
             </button>
           </form>
         ) : (
-          <div className="max-h-[82vh] overflow-y-auto p-6 sm:p-8">
+          <div className="max-h-[82vh] overflow-y-auto p-8 sm:p-12">
             {mode === 'choice' && (
-              <div className="grid gap-5 lg:grid-cols-2">
-                <button onClick={() => setMode('manual')} className="group rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm shadow-slate-200/70 transition hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-xl hover:shadow-slate-200">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#7f1d1d] text-white shadow-lg shadow-rose-900/20">
-                    <FileArchive className="h-7 w-7" />
-                  </div>
-                  <h4 className="text-xl font-extrabold text-slate-950">Manual Archive</h4>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">Add a single finalized thesis record with authors, adviser, academic context, and abstract.</p>
-                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#7f1d1d]">Open form <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
-                </button>
-
-                <button onClick={() => setMode('bulk')} className="group rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-left transition hover:-translate-y-0.5 hover:border-[#7f1d1d] hover:bg-rose-50/40">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#7f1d1d] shadow-sm ring-1 ring-rose-100">
-                    <CloudUpload className="h-7 w-7" />
-                  </div>
-                  <h4 className="text-xl font-extrabold text-slate-950">Bulk Import CSV</h4>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">Upload a structured CSV file to parse and archive multiple thesis records in one workflow.</p>
-                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#7f1d1d]">Prepare upload <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
-                </button>
+              <div className="grid gap-6 lg:grid-cols-2">
+                <ArchiveChoice 
+                  onClick={() => setMode('manual')}
+                  icon={FileArchive}
+                  title="Manual Deposition"
+                  description="Register a single finalized research document with comprehensive metadata and abstract records."
+                  action="Initialize Form"
+                />
+                <ArchiveChoice 
+                  onClick={() => setMode('bulk')}
+                  icon={CloudUpload}
+                  title="Bulk Intelligence Import"
+                  description="Propagate multiple research records simultaneously using structured data schemas (CSV)."
+                  action="Prepare Sequence"
+                  secondary
+                />
               </div>
             )}
 
@@ -847,11 +944,35 @@ function AdminArchiveFlow({ form, setForm, isSaving, onClose, onSubmit, onImport
   );
 }
 
+function ArchiveChoice({ onClick, icon: Icon, title, description, action, secondary }: any) {
+  return (
+    <button 
+      onClick={onClick} 
+      className={`group relative overflow-hidden rounded-[2.5rem] border p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+        secondary 
+          ? 'border-dashed border-slate-300 bg-slate-50 hover:border-maroon-900 hover:bg-maroon-50/20' 
+          : 'border-slate-200 bg-white hover:border-maroon-100 hover:shadow-maroon-900/10'
+      }`}
+    >
+      <div className={`mb-6 flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg transition-transform group-hover:scale-110 ${
+        secondary ? 'bg-white text-maroon-900 ring-1 ring-slate-100' : 'bg-maroon-gradient text-white shadow-maroon-900/20'
+      }`}>
+        <Icon className="h-8 w-8" />
+      </div>
+      <h4 className="text-2xl font-black tracking-tight text-slate-950">{title}</h4>
+      <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">{description}</p>
+      <span className="mt-8 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-maroon-900">
+        {action} <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+      </span>
+    </button>
+  );
+}
+
 function FlowBackButton({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="mb-5 inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200">
+    <button onClick={onClick} className="mb-8 inline-flex items-center gap-3 rounded-2xl bg-slate-100 px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-200 active:scale-95">
       <ChevronRight className="h-4 w-4 rotate-180" />
-      Back to choices
+      Return to Operations
     </button>
   );
 }
@@ -868,16 +989,16 @@ function CsvDropzone({ onImport, onClose }: { onImport: (file?: File) => Promise
   };
 
   return (
-    <label className="block cursor-pointer rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-[#7f1d1d] hover:bg-rose-50/40">
+    <label className="group block cursor-pointer rounded-[3rem] border-4 border-dashed border-slate-200 bg-slate-50 p-16 text-center transition-all hover:border-maroon-900 hover:bg-maroon-50/20">
       <input type="file" accept=".csv" className="hidden" onChange={event => importFile(event.target.files?.[0])} />
-      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-white text-[#7f1d1d] shadow-sm ring-1 ring-rose-100">
-        <CloudUpload className="h-10 w-10" />
+      <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white text-maroon-900 shadow-xl shadow-slate-200 ring-1 ring-slate-100 transition-transform group-hover:scale-110">
+        <CloudUpload className="h-12 w-12" />
       </div>
-      <h4 className="text-2xl font-extrabold text-slate-950">Drop or select a CSV file</h4>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">Use the department thesis archive template. The importer will parse thesis title, authors, batch, section, adviser, panel members, and abstract.</p>
-      <span className="mt-6 inline-flex rounded-2xl bg-[#7f1d1d] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20">
-        {isImporting ? 'Importing...' : 'Choose CSV File'}
-      </span>
+      <h4 className="text-3xl font-black tracking-tight text-slate-950">Streamline Deployment</h4>
+      <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-relaxed text-slate-500">Integrate departmental archives via CSV. The system will automatically parse titles, authors, academic batches, and complex abstract data into the master repository.</p>
+      <div className="mt-10 inline-flex items-center gap-3 rounded-2xl bg-maroon-gradient px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-2xl shadow-maroon-900/30 transition-all hover:brightness-110 active:scale-95">
+        {isImporting ? 'Processing Sequence...' : 'Initialize Schema Import'}
+      </div>
     </label>
   );
 }
@@ -886,39 +1007,230 @@ function ArchiveForm({ form, setForm, isSaving, onClose, onSubmit }: any) {
   const update = (field: string, value: string) => setForm((current: typeof emptyForm) => ({ ...current, [field]: value }));
 
   return (
-      <form onSubmit={onSubmit} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-        <h3 className="mb-6 text-2xl font-extrabold text-slate-950">Manual Thesis Archive</h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Thesis Title" value={form.thesis_title} onChange={(value: string) => update('thesis_title', value)} required wide />
-          <Input label="Authors" value={form.author_name} onChange={(value: string) => update('author_name', value)} placeholder="Separate names with commas" required wide />
-          <Input label="Batch Year" value={form.batch_year} onChange={(value: string) => update('batch_year', value)} required />
-          <Input label="Section" value={form.section_block} onChange={(value: string) => update('section_block', value)} required />
-          <Input label="Group Code" value={form.group_code} onChange={(value: string) => update('group_code', value)} />
+      <form onSubmit={onSubmit} className="rounded-[2.5rem] border border-slate-100 bg-gradient-to-br from-white to-slate-100 p-8 shadow-2xl shadow-slate-300/50">
+        <div className="mb-10 flex items-center justify-between">
+          <h3 className="text-2xl font-black tracking-tight text-slate-950">Manual Deposition Entry</h3>
+          <div className="rounded-xl bg-maroon-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-maroon-900 ring-1 ring-maroon-100">Draft Status</div>
+        </div>
+        
+        <div className="grid gap-6 md:grid-cols-2">
+          <Input label="Research Designation (Title)" value={form.thesis_title} onChange={(value: string) => update('thesis_title', value)} placeholder="Enter finalized thesis title..." required wide />
+          <Input label="Lead Investigators (Authors)" value={form.author_name} onChange={(value: string) => update('author_name', value)} placeholder="Separate contributors with commas..." required wide />
+          <Input label="Academic Batch" value={form.batch_year} onChange={(value: string) => update('batch_year', value)} placeholder="e.g., 2024" required />
+          <Input label="Registry Section" value={form.section_block} onChange={(value: string) => update('section_block', value)} placeholder="e.g., 5-1" required />
+          <Input label="Group Identifier" value={form.group_code} onChange={(value: string) => update('group_code', value)} placeholder="e.g., G-01" />
           <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold text-slate-700">Main Adviser</span>
-            <select value={form.main_adviser} onChange={event => update('main_adviser', event.target.value)} required className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 outline-none focus:border-[#7f1d1d] focus:ring-4 focus:ring-rose-100">
-              <option value="">Select adviser</option>
+            <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400">Principal Academic Adviser</span>
+            <select 
+              value={form.main_adviser} 
+              onChange={event => update('main_adviser', event.target.value)} 
+              required 
+              className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-bold text-slate-950 outline-none transition focus:border-maroon-900 focus:bg-white focus:ring-4 focus:ring-maroon-100"
+            >
+              <option value="">Select official adviser...</option>
               {adviserOptions.map(adviser => <option key={adviser}>{adviser}</option>)}
             </select>
           </label>
           <label className="md:col-span-2">
-            <span className="mb-1.5 block text-sm font-semibold text-slate-700">Abstract</span>
-            <textarea value={form.abstract} onChange={event => update('abstract', event.target.value)} required rows={5} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#7f1d1d] focus:ring-4 focus:ring-rose-100" />
+            <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400">Executive Abstract & Findings</span>
+            <textarea 
+              value={form.abstract} 
+              onChange={event => update('abstract', event.target.value)} 
+              required 
+              rows={6} 
+              placeholder="Paste the approved thesis abstract here..."
+              className="w-full rounded-[2rem] border border-slate-200 bg-slate-50 px-6 py-5 text-sm font-medium leading-relaxed text-slate-700 outline-none transition focus:border-maroon-900 focus:bg-white focus:ring-4 focus:ring-maroon-100" 
+            />
           </label>
         </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="rounded-2xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700">Cancel</button>
-          <button type="submit" disabled={isSaving} className="rounded-2xl bg-[#7f1d1d] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{isSaving ? 'Saving...' : 'Archive Thesis'}</button>
+        <div className="mt-10 flex justify-end gap-4 border-t border-slate-50 pt-8">
+          <button type="button" onClick={onClose} className="h-14 rounded-2xl bg-slate-100 px-8 text-sm font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-200 active:scale-95">Discard</button>
+          <button type="submit" disabled={isSaving} className="h-14 rounded-2xl bg-maroon-gradient px-10 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-maroon-900/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-60">
+            {isSaving ? 'Synchronizing...' : 'Finalize Archive'}
+          </button>
         </div>
       </form>
+  );
+}
+
+function Analytics({ theses }: { theses: Thesis[] }) {
+  const yearsData = useMemo(() => {
+    const counts = theses.reduce((acc, thesis) => {
+      const year = thesis.batch_year || 'Unknown';
+      acc[year] = (acc[year] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(counts)
+      .map(([year, count]) => ({ year, count }))
+      .sort((a, b) => a.year.localeCompare(b.year))
+      .filter(item => item.year !== 'Unknown');
+  }, [theses]);
+
+  const adviserData = useMemo(() => {
+    const counts = theses.reduce((acc, thesis) => {
+      const adviser = thesis.main_adviser || 'Unassigned';
+      acc[adviser] = (acc[adviser] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Top 5
+  }, [theses]);
+
+  const techData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    theses.forEach(thesis => {
+      const badges = getTechBadges(thesis);
+      badges.forEach(badge => {
+        counts[badge] = (counts[badge] || 0) + 1;
+      });
+    });
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5
+  }, [theses]);
+
+  const COLORS = ['#7f1d1d', '#991b1b', '#b91c1c', '#dc2626', '#ef4444', '#f87171'];
+
+  return (
+    <div className="space-y-8">
+      <div className="mb-8">
+        <h3 className="text-3xl font-black tracking-tight text-slate-950">Repository Analytics</h3>
+        <p className="mt-2 text-sm font-medium text-slate-500">Comprehensive data visualization of academic output, technological trends, and faculty engagement.</p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="flex flex-col overflow-hidden rounded-[2.5rem] border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-8 shadow-xl shadow-maroon-900/10 backdrop-blur-xl">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon-50 text-maroon-900 ring-1 ring-maroon-100">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="text-lg font-black text-slate-950">Archive Volume Trend</h4>
+              <p className="text-xs font-bold text-slate-400">Total publications per batch year</p>
+            </div>
+          </div>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={yearsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#7f1d1d" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#7f1d1d" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b', fontWeight: 700 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b', fontWeight: 700 }} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}
+                  itemStyle={{ color: '#7f1d1d' }}
+                />
+                <Area type="monotone" dataKey="count" stroke="#7f1d1d" strokeWidth={4} fillOpacity={1} fill="url(#colorCount)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="flex flex-col overflow-hidden rounded-[2.5rem] border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-8 shadow-xl shadow-maroon-900/10 backdrop-blur-xl">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon-50 text-maroon-900 ring-1 ring-maroon-100">
+              <PieChartIcon className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="text-lg font-black text-slate-950">Technology Distribution</h4>
+              <p className="text-xs font-bold text-slate-400">Primary research domains (Top 5)</p>
+            </div>
+          </div>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={techData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={110}
+                  paddingAngle={5}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {techData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-4">
+            {techData.map((entry, index) => (
+              <div key={entry.name} className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                <span className="text-xs font-bold text-slate-600">{entry.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 flex flex-col overflow-hidden rounded-[2.5rem] border border-white/80 bg-gradient-to-br from-white/90 to-slate-200/60 p-8 shadow-xl shadow-maroon-900/10 backdrop-blur-xl">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon-50 text-maroon-900 ring-1 ring-maroon-100">
+              <Users className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="text-lg font-black text-slate-950">Adviser Engagement</h4>
+              <p className="text-xs font-bold text-slate-400">Top 5 faculty members by supervised archives</p>
+            </div>
+          </div>
+          <div className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={adviserData} layout="vertical" margin={{ top: 0, right: 20, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b', fontWeight: 700 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#475569', fontWeight: 700 }} width={140} />
+                <Tooltip 
+                  cursor={{ fill: '#f8fafc' }}
+                  contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}
+                />
+                <Bar dataKey="count" fill="url(#colorBar)" radius={[0, 8, 8, 0]} barSize={24}>
+                  {adviserData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % 2]} /> // Alternate between two deep maroons
+                  ))}
+                </Bar>
+                <defs>
+                  <linearGradient id="colorBar" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#991b1b" />
+                    <stop offset="100%" stopColor="#7f1d1d" />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function Input({ label, value, onChange, placeholder, required, wide }: any) {
   return (
     <label className={wide ? 'block md:col-span-2' : 'block'}>
-      <span className="mb-1.5 block text-sm font-semibold text-slate-700">{label}</span>
-      <input value={value} onChange={event => onChange(event.target.value)} placeholder={placeholder} required={required} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 outline-none focus:border-[#7f1d1d] focus:ring-4 focus:ring-rose-100" />
+      <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
+      <input 
+        value={value} 
+        onChange={event => onChange(event.target.value)} 
+        placeholder={placeholder} 
+        required={required} 
+        className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-bold text-slate-950 outline-none transition focus:border-maroon-900 focus:bg-white focus:ring-4 focus:ring-maroon-100" 
+      />
     </label>
   );
 }

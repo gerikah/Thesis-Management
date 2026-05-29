@@ -1,18 +1,24 @@
 <?php
+// 1. Error Reporting (Keep this on while debugging, but remove in production)
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+// 2. Single set of CORS Headers
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Content-Type: application/json");
 
+// 3. Handle the Preflight Request ONCE
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit;
+    http_response_code(200);
+    exit();
 }
 
+// 4. Connect to Database
 include 'db_connect.php';
 
+// 5. Initialize search parameters
 $search = trim($_GET['search'] ?? '');
 $batchYear = trim($_GET['batch_year'] ?? '');
 $adviser = trim($_GET['adviser'] ?? '');

@@ -2,11 +2,22 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-maroon-50: #fef2f2;
+  --color-maroon-100: #fee2e2;
+  --color-maroon-200: #fecaca;
+  --color-maroon-300: #fca5a5;
+  --color-maroon-400: #f87171;
+  --color-maroon-500: #ef4444;
+  --color-maroon-600: #dc2626;
+  --color-maroon-700: #b91c1c;
+  --color-maroon-800: #991b1b;
+  --color-maroon-900: #7f1d1d;
+  --color-maroon-950: #450a0a;
 }
 
 :root {
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  background: #f8fafc;
+  background: #fdfcfc;
   color: #020617;
 }
 
@@ -23,10 +34,32 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(127, 29, 29, 0.08), transparent 32rem),
-    #f8fafc;
+    radial-gradient(circle at top left, rgba(127, 29, 29, 0.1), transparent 50rem),
+    radial-gradient(circle at bottom right, rgba(127, 29, 29, 0.08), transparent 50rem),
+    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+.bg-maroon-gradient {
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+}
+
+.bg-maroon-gradient-light {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+}
+
+.text-maroon-gradient {
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 button,
@@ -49,6 +82,15 @@ button {
   }
   100% {
     transform: translateX(220%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }
 
