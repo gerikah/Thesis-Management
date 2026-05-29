@@ -1,23 +1,30 @@
 import './index.css';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Archive,
   BarChart3,
   BookOpen,
+  CalendarDays,
   CheckCircle2,
   ChevronRight,
+  CloudUpload,
   Database,
   FileArchive,
+  FileText,
   Filter,
+  GraduationCap,
   Grid3X3,
   Layers3,
   LibraryBig,
   List,
+  LockKeyhole,
   Plus,
   Search,
+  ShieldCheck,
   Sparkles,
   Upload,
+  UserRound,
   Users,
   X,
 } from 'lucide-react';
@@ -108,6 +115,17 @@ function getTechBadges(thesis: Thesis) {
     : ['Research', 'CpE'];
 }
 
+function getKeywords(thesis: Thesis) {
+  const badges = getTechBadges(thesis);
+  const technicalWords = `${thesis.thesis_title || ''} ${thesis.abstract || ''}`
+    .split(/[^A-Za-z0-9+/.-]+/)
+    .map(word => word.trim())
+    .filter(word => word.length > 4 && !['thesis', 'system', 'using', 'based', 'study', 'research'].includes(word.toLowerCase()))
+    .slice(0, 8);
+
+  return Array.from(new Set([...badges, ...technicalWords])).slice(0, 8);
+}
+
 function dateLabel(date?: string) {
   if (!date) return 'Recently archived';
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -125,10 +143,9 @@ function App() {
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedTech, setSelectedTech] = useState('');
   const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
-  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [adminFlowOpen, setAdminFlowOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchTheses = async (params = new URLSearchParams()) => {
     const query = params.toString();
@@ -225,7 +242,7 @@ function App() {
     setIsSaving(false);
 
     if (result.status === 'success') {
-      setArchiveOpen(false);
+      setAdminFlowOpen(false);
       setForm(emptyForm);
       await fetchTheses();
     } else {
@@ -235,14 +252,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        className="hidden"
-        onChange={event => handleImport(event.target.files?.[0])}
-      />
-
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-white/10 bg-[#4b0713] px-4 py-5 text-white shadow-2xl shadow-rose-950/20 lg:flex lg:flex-col">
         <div className="mb-9 flex items-center gap-3 px-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
@@ -282,11 +291,11 @@ function App() {
             </h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50" onClick={() => fileInputRef.current?.click()}>
+            <button className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50" onClick={() => setAdminFlowOpen(true)}>
               <Upload className="h-4 w-4" />
               Import CSV
             </button>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-[#7f1d1d] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/20 hover:bg-[#681919]" onClick={() => setArchiveOpen(true)}>
+            <button className="inline-flex items-center gap-2 rounded-xl bg-[#7f1d1d] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/20 hover:bg-[#681919]" onClick={() => setAdminFlowOpen(true)}>
               <Plus className="h-4 w-4" />
               Archive New Thesis
             </button>
@@ -294,7 +303,7 @@ function App() {
         </header>
 
         {view === 'dashboard' ? (
-          <Dashboard metrics={metrics} stats={categoryStats} theses={allTheses} onArchive={() => setArchiveOpen(true)} onImport={() => fileInputRef.current?.click()} />
+          <Dashboard metrics={metrics} stats={categoryStats} theses={allTheses} onArchive={() => setAdminFlowOpen(true)} onImport={() => setAdminFlowOpen(true)} />
         ) : (
           <Repository
             theses={visibleTheses}
@@ -321,13 +330,14 @@ function App() {
       </main>
 
       {selectedThesis && <ThesisModal thesis={selectedThesis} onClose={() => setSelectedThesis(null)} />}
-      {archiveOpen && (
-        <ArchiveModal
+      {adminFlowOpen && (
+        <AdminArchiveFlow
           form={form}
           setForm={setForm}
           isSaving={isSaving}
-          onClose={() => setArchiveOpen(false)}
+          onClose={() => setAdminFlowOpen(false)}
           onSubmit={handleArchive}
+          onImport={handleImport}
         />
       )}
     </div>
@@ -424,7 +434,7 @@ function Dashboard({ metrics, stats, theses, onArchive, onImport }: any) {
           {recent.map((thesis: Thesis) => (
             <div key={thesis.archive_id} className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
               <p className="line-clamp-2 font-semibold text-slate-900">{thesis.thesis_title}</p>
-              <p className="mt-2 text-sm text-slate-500">{dateLabel(thesis.created_at)} · {thesis.batch_year || 'No batch'}</p>
+              <p className="mt-2 text-sm text-slate-500">{dateLabel(thesis.created_at)} / {thesis.batch_year || 'No batch'}</p>
             </div>
           ))}
         </div>
@@ -547,51 +557,294 @@ function ThesisTable({ theses, onSelect }: { theses: Thesis[]; onSelect: (thesis
 }
 
 function ThesisModal({ thesis, onClose }: { thesis: Thesis; onClose: () => void }) {
+  const authors = getAuthors(thesis);
+  const panelMembers = thesis.final_panel_members?.split(',').map(panel => panel.trim()).filter(Boolean) || [];
+  const keywords = getKeywords(thesis);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-6">
-          <div>
-            <p className="mb-2 text-sm font-bold uppercase tracking-[0.12em] text-[#7f1d1d]">{thesis.batch_year || 'Archived Thesis'}</p>
-            <h3 className="text-2xl font-bold leading-tight text-slate-950">{thesis.thesis_title}</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-md">
+      <div className="max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-950/20">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
+            <BookOpen className="h-4 w-4 text-[#7f1d1d]" />
+            Thesis Detail
           </div>
-          <button onClick={onClose} className="rounded-2xl bg-slate-100 p-2 text-slate-600 hover:bg-slate-200"><X className="h-5 w-5" /></button>
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+          >
+            <X className="h-4 w-4" />
+            Close
+          </button>
         </div>
-        <div className="grid gap-4 p-6 md:grid-cols-3">
-          <Detail label="Authors" value={getAuthors(thesis).join(', ') || 'No authors listed'} />
-          <Detail label="Adviser" value={thesis.main_adviser || 'Unassigned'} />
-          <Detail label="Section" value={thesis.section_block || 'N/A'} />
-        </div>
-        <div className="px-6 pb-6">
-          <div className="rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-100">
-            <h4 className="mb-3 font-bold text-slate-950">Abstract</h4>
-            <p className="leading-7 text-slate-600">{thesis.abstract || 'No abstract provided.'}</p>
-          </div>
+
+        <div className="grid max-h-[calc(92vh-73px)] overflow-y-auto lg:grid-cols-[minmax(0,1fr)_360px]">
+          <article className="p-6 sm:p-8 lg:p-10">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#7f1d1d] ring-1 ring-rose-100">
+              <FileText className="h-3.5 w-3.5" />
+              Archived Research
+            </p>
+            <h2 className="max-w-4xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">
+              {thesis.thesis_title || 'Untitled Thesis'}
+            </h2>
+
+            <section className="mt-10">
+              <h3 className="mb-4 text-lg font-bold text-slate-950">Abstract</h3>
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
+                <p className="whitespace-pre-line text-base leading-8 text-slate-700">
+                  {thesis.abstract || 'No abstract has been provided for this archived thesis.'}
+                </p>
+              </div>
+            </section>
+
+            <section className="mt-8">
+              <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-slate-400">Keywords</h3>
+              <div className="flex flex-wrap gap-2">
+                {keywords.map((keyword, index) => (
+                  <span key={keyword} className={`rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${badgePalette[index % badgePalette.length]}`}>
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </section>
+          </article>
+
+          <aside className="border-t border-slate-100 bg-slate-50/80 p-6 sm:p-8 lg:border-l lg:border-t-0">
+            <div className="sticky top-0 rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/80 backdrop-blur">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#7f1d1d] text-white">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-950">Thesis Metadata</h3>
+                  <p className="text-sm text-slate-500">Academic record summary</p>
+                </div>
+              </div>
+
+              <MetadataSection title="Authors">
+                <div className="space-y-3">
+                  {(authors.length ? authors : ['No authors listed']).map(author => (
+                    <div key={author} className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                        <UserRound className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">{author}</span>
+                    </div>
+                  ))}
+                </div>
+              </MetadataSection>
+
+              <MetadataSection title="Adviser & Panel Members">
+                <div className="space-y-3">
+                  <AcademicPerson label="Adviser" name={thesis.main_adviser || 'Unassigned'} />
+                  {(panelMembers.length ? panelMembers : ['No panel members recorded']).map(panel => (
+                    <AcademicPerson key={panel} label="Panel" name={panel} muted={!panelMembers.length} />
+                  ))}
+                </div>
+              </MetadataSection>
+
+              <MetadataSection title="Academic Context">
+                <div className="grid grid-cols-2 gap-3">
+                  <ContextTile label="Batch" value={thesis.batch_year || 'N/A'} />
+                  <ContextTile label="Section" value={thesis.section_block || 'N/A'} />
+                  <ContextTile label="Group" value={thesis.group_code || 'N/A'} wide />
+                </div>
+              </MetadataSection>
+
+              <div className="mt-5 flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500 ring-1 ring-slate-100">
+                <CalendarDays className="h-4 w-4" />
+                <span>Date archived: <strong className="font-semibold text-slate-700">{dateLabel(thesis.created_at)}</strong></span>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function MetadataSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-slate-800">{value}</p>
+    <section className="border-t border-slate-100 py-5 first:border-t-0 first:pt-0">
+      <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{title}</h4>
+      {children}
+    </section>
+  );
+}
+
+function AcademicPerson({ label, name, muted }: { label: string; name: string; muted?: boolean }) {
+  return (
+    <div className="flex gap-3">
+      <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-rose-50 text-[#7f1d1d]">
+        <GraduationCap className="h-4 w-4" />
+      </span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
+        <p className={`text-sm font-semibold ${muted ? 'text-slate-400' : 'text-slate-800'}`}>{name}</p>
+      </div>
     </div>
   );
 }
 
-function ArchiveModal({ form, setForm, isSaving, onClose, onSubmit }: any) {
+function ContextTile({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
+  return (
+    <div className={`rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-100 ${wide ? 'col-span-2' : ''}`}>
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-bold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function AdminArchiveFlow({ form, setForm, isSaving, onClose, onSubmit, onImport }: any) {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [mode, setMode] = useState<'choice' | 'manual' | 'bulk'>('choice');
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [authError, setAuthError] = useState('');
+
+  const submitAuth = (event: React.FormEvent) => {
+    event.preventDefault();
+    const validAdmins = ['admin', 'thesis_head', 'coordinator'];
+
+    if (!validAdmins.includes(credentials.username.toLowerCase()) || !credentials.password.trim()) {
+      setAuthError('Use an authorized admin, thesis head, or coordinator account.');
+      return;
+    }
+
+    setAuthError('');
+    setAuthenticated(true);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-md">
+      <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-950/20">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#7f1d1d] text-white">
+              <ShieldCheck className="h-5 w-5" />
+            </span>
+            <div>
+              <h3 className="font-bold text-slate-950">Administrative Archiving</h3>
+              <p className="text-sm text-slate-500">{authenticated ? 'Choose an archive method' : 'Authentication required'}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-2xl bg-slate-100 p-2 text-slate-600 transition hover:bg-slate-200">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {!authenticated ? (
+          <form onSubmit={submitAuth} className="mx-auto max-w-md p-8">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-[#7f1d1d] ring-1 ring-rose-100">
+                <LockKeyhole className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-950">Admin Authentication</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Verify administrative privileges before modifying repository records.</p>
+            </div>
+
+            <div className="space-y-4">
+              <Input label="Username" value={credentials.username} onChange={(value: string) => setCredentials({ ...credentials, username: value })} required />
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-semibold text-slate-700">Password</span>
+                <input
+                  type="password"
+                  value={credentials.password}
+                  onChange={event => setCredentials({ ...credentials, password: event.target.value })}
+                  required
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 outline-none focus:border-[#7f1d1d] focus:ring-4 focus:ring-rose-100"
+                />
+              </label>
+            </div>
+            {authError && <p className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 ring-1 ring-rose-100">{authError}</p>}
+            <button type="submit" className="mt-6 w-full rounded-2xl bg-[#7f1d1d] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20">
+              Unlock Administrative Tools
+            </button>
+          </form>
+        ) : (
+          <div className="max-h-[82vh] overflow-y-auto p-6 sm:p-8">
+            {mode === 'choice' && (
+              <div className="grid gap-5 lg:grid-cols-2">
+                <button onClick={() => setMode('manual')} className="group rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm shadow-slate-200/70 transition hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-xl hover:shadow-slate-200">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#7f1d1d] text-white shadow-lg shadow-rose-900/20">
+                    <FileArchive className="h-7 w-7" />
+                  </div>
+                  <h4 className="text-xl font-extrabold text-slate-950">Manual Archive</h4>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Add a single finalized thesis record with authors, adviser, academic context, and abstract.</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#7f1d1d]">Open form <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+                </button>
+
+                <button onClick={() => setMode('bulk')} className="group rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-left transition hover:-translate-y-0.5 hover:border-[#7f1d1d] hover:bg-rose-50/40">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#7f1d1d] shadow-sm ring-1 ring-rose-100">
+                    <CloudUpload className="h-7 w-7" />
+                  </div>
+                  <h4 className="text-xl font-extrabold text-slate-950">Bulk Import CSV</h4>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Upload a structured CSV file to parse and archive multiple thesis records in one workflow.</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#7f1d1d]">Prepare upload <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+                </button>
+              </div>
+            )}
+
+            {mode === 'manual' && (
+              <div>
+                <FlowBackButton onClick={() => setMode('choice')} />
+                <ArchiveForm form={form} setForm={setForm} isSaving={isSaving} onClose={onClose} onSubmit={onSubmit} />
+              </div>
+            )}
+
+            {mode === 'bulk' && (
+              <div>
+                <FlowBackButton onClick={() => setMode('choice')} />
+                <CsvDropzone onImport={onImport} onClose={onClose} />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FlowBackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="mb-5 inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200">
+      <ChevronRight className="h-4 w-4 rotate-180" />
+      Back to choices
+    </button>
+  );
+}
+
+function CsvDropzone({ onImport, onClose }: { onImport: (file?: File) => Promise<void>; onClose: () => void }) {
+  const [isImporting, setIsImporting] = useState(false);
+
+  const importFile = async (file?: File) => {
+    if (!file) return;
+    setIsImporting(true);
+    await onImport(file);
+    setIsImporting(false);
+    onClose();
+  };
+
+  return (
+    <label className="block cursor-pointer rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-[#7f1d1d] hover:bg-rose-50/40">
+      <input type="file" accept=".csv" className="hidden" onChange={event => importFile(event.target.files?.[0])} />
+      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-white text-[#7f1d1d] shadow-sm ring-1 ring-rose-100">
+        <CloudUpload className="h-10 w-10" />
+      </div>
+      <h4 className="text-2xl font-extrabold text-slate-950">Drop or select a CSV file</h4>
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">Use the department thesis archive template. The importer will parse thesis title, authors, batch, section, adviser, panel members, and abstract.</p>
+      <span className="mt-6 inline-flex rounded-2xl bg-[#7f1d1d] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/20">
+        {isImporting ? 'Importing...' : 'Choose CSV File'}
+      </span>
+    </label>
+  );
+}
+
+function ArchiveForm({ form, setForm, isSaving, onClose, onSubmit }: any) {
   const update = (field: string, value: string) => setForm((current: typeof emptyForm) => ({ ...current, [field]: value }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <form onSubmit={onSubmit} className="w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-2xl font-bold text-slate-950">Archive New Thesis</h3>
-          <button type="button" onClick={onClose} className="rounded-2xl bg-slate-100 p-2 text-slate-600"><X className="h-5 w-5" /></button>
-        </div>
+      <form onSubmit={onSubmit} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
+        <h3 className="mb-6 text-2xl font-extrabold text-slate-950">Manual Thesis Archive</h3>
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Thesis Title" value={form.thesis_title} onChange={(value: string) => update('thesis_title', value)} required wide />
           <Input label="Authors" value={form.author_name} onChange={(value: string) => update('author_name', value)} placeholder="Separate names with commas" required wide />
@@ -615,7 +868,6 @@ function ArchiveModal({ form, setForm, isSaving, onClose, onSubmit }: any) {
           <button type="submit" disabled={isSaving} className="rounded-2xl bg-[#7f1d1d] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{isSaving ? 'Saving...' : 'Archive Thesis'}</button>
         </div>
       </form>
-    </div>
   );
 }
 
