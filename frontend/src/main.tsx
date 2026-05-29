@@ -1,4 +1,5 @@
 import './index.css';
+import projectLogo from './assets/cpe-archive-logo.png';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -6,7 +7,6 @@ import {
   BarChart3,
   BookOpen,
   CalendarDays,
-  CheckCircle2,
   ChevronRight,
   CloudUpload,
   Database,
@@ -46,6 +46,7 @@ type View = 'dashboard' | 'repository';
 type LayoutMode = 'grid' | 'table';
 
 const API_BASE = 'http://localhost/Thesis-Management/backend';
+const MIN_LOADING_TIME_MS = 2600;
 
 const adviserOptions = [
   'Dr. Antonio Y. Velasco',
@@ -73,12 +74,6 @@ const badgePalette = [
   'bg-sky-50 text-sky-700 ring-sky-200',
   'bg-amber-50 text-amber-800 ring-amber-200',
   'bg-violet-50 text-violet-700 ring-violet-200',
-];
-
-const pendingApprovals = [
-  'Capstone metadata review',
-  'Hardbound copy verification',
-  'Panel signature completion',
 ];
 
 const emptyForm = {
@@ -146,15 +141,22 @@ function App() {
   const [adminFlowOpen, setAdminFlowOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const fetchTheses = async (params = new URLSearchParams()) => {
     const query = params.toString();
-    const response = await fetch(`${API_BASE}/fetch_theses.php${query ? `?${query}` : ''}`);
-    const result = await response.json();
+    try {
+      const response = await fetch(`${API_BASE}/fetch_theses.php${query ? `?${query}` : ''}`);
+      const result = await response.json();
 
-    if (result.status === 'success') {
-      setTheses(result.data);
-      if (!query) setAllTheses(result.data);
+      if (result.status === 'success') {
+        setTheses(result.data);
+        if (!query) setAllTheses(result.data);
+      }
+    } finally {
+      if (!query) {
+        window.setTimeout(() => setIsInitialLoading(false), MIN_LOADING_TIME_MS);
+      }
     }
   };
 
@@ -252,6 +254,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
+      {isInitialLoading && <LoadingScreen />}
+
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-white/10 bg-[#4b0713] px-4 py-5 text-white shadow-2xl shadow-rose-950/20 lg:flex lg:flex-col">
         <div className="mb-9 flex items-center gap-3 px-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
@@ -279,7 +283,7 @@ function App() {
         </div>
       </aside>
 
-      <main className="min-h-screen px-4 py-6 sm:px-6 lg:ml-72 lg:px-10">
+      <main className={`px-4 py-6 sm:px-6 lg:ml-72 lg:px-10 ${view === 'dashboard' ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
         <header className="mb-8 flex flex-col gap-4 rounded-3xl border border-white bg-white/80 p-5 shadow-sm shadow-slate-200/70 backdrop-blur md:flex-row md:items-center md:justify-between">
           <div>
             <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#7f1d1d] ring-1 ring-rose-100">
@@ -358,43 +362,83 @@ function NavButton({ active, icon: Icon, label, onClick }: { active: boolean; ic
   );
 }
 
+function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[#3b0610] px-6 text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(255,255,255,0.14),transparent_28rem),radial-gradient(circle_at_76%_76%,rgba(250,204,21,0.14),transparent_22rem)]" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent" />
+
+      <div className="relative flex w-full max-w-3xl flex-col items-center text-center">
+        <div className="mb-7 flex items-center gap-5">
+          <div className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-white p-3 shadow-2xl shadow-black/20 ring-1 ring-white/30">
+            <img src={projectLogo} alt="Thesis archive project logo" className="h-full w-full object-contain" />
+          </div>
+          <div className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-white/10 shadow-2xl shadow-black/10 ring-1 ring-white/20 backdrop-blur">
+            <div className="text-center">
+              <BookOpen className="mx-auto h-9 w-9 text-rose-100" />
+              <p className="mt-1 text-sm font-extrabold tracking-tight text-white">CpE</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-rose-100/70">Computer Engineering Department</p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">Thesis Management System</h1>
+        <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-rose-50/80 sm:text-lg">
+          The Definitive Archive of Computer Engineering Innovation
+        </p>
+
+        <div className="mt-9 w-full max-w-sm">
+          <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[0.16em] text-rose-100/60">
+            <span>Preparing repository</span>
+            <span>Secure archive</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/10">
+            <div className="h-full w-1/2 animate-[loading-slide_1.35s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-rose-100 via-amber-200 to-rose-100" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ metrics, stats, theses, onArchive, onImport }: any) {
-  const recent = theses.slice(0, 4);
+  const recent = theses.slice(0, 6);
+  const latest = recent[0];
 
   return (
-    <div className="space-y-7">
+    <div className="grid h-[calc(100vh-9rem)] grid-rows-[auto_1fr_1.05fr] gap-4 overflow-hidden">
       <section className="grid gap-4 md:grid-cols-3">
         {metrics.map((metric: any) => (
-          <div key={metric.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-            <div className="mb-5 flex items-center justify-between">
+          <div key={metric.label} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-rose-50" />
+            <div className="relative mb-4 flex items-center justify-between">
               <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ${metric.accent}`}>
                 <metric.icon className="h-6 w-6" />
               </div>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Live</span>
             </div>
-            <p className="text-sm font-medium text-slate-500">{metric.label}</p>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-slate-950">{metric.value}</p>
+            <p className="relative text-sm font-medium text-slate-500">{metric.label}</p>
+            <p className="relative mt-1 text-4xl font-bold tracking-tight text-slate-950">{metric.value}</p>
           </div>
         ))}
       </section>
 
-      <section className="grid gap-7 xl:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-          <div className="mb-6 flex items-center justify-between">
+      <section className="grid min-h-0 gap-4 xl:grid-cols-[1.45fr_0.75fr]">
+        <div className="flex min-h-0 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
+          <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-slate-950">Theses by Technology Category</h3>
               <p className="text-sm text-slate-500">Classification inferred from thesis titles and abstracts.</p>
             </div>
             <Archive className="h-5 w-5 text-[#7f1d1d]" />
           </div>
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid flex-1 gap-4 md:grid-cols-2">
             {stats.map((category: any) => (
-              <div key={category.label} className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-                <div className="mb-3 flex items-center justify-between">
+              <div key={category.label} className="flex flex-col justify-center rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="font-semibold text-slate-800">{category.label}</span>
                   <span className="text-sm font-bold text-slate-500">{category.count}</span>
                 </div>
-                <div className="h-3 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                <div className="h-4 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
                   <div className={`h-full rounded-full ${category.color}`} style={{ width: `${category.percentage}%` }} />
                 </div>
               </div>
@@ -402,7 +446,7 @@ function Dashboard({ metrics, stats, theses, onArchive, onImport }: any) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
+        <div className="flex min-h-0 flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
           <h3 className="mb-4 text-lg font-bold text-slate-950">Admin Quick Actions</h3>
           <div className="grid gap-3">
             <button onClick={onImport} className="flex items-center justify-between rounded-2xl bg-[#7f1d1d] px-4 py-3 text-left font-semibold text-white shadow-lg shadow-rose-900/20">
@@ -414,25 +458,19 @@ function Dashboard({ metrics, stats, theses, onArchive, onImport }: any) {
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
-          <div className="mt-6">
-            <p className="mb-3 text-sm font-bold uppercase tracking-[0.12em] text-slate-400">Pending Approvals</p>
-            <div className="space-y-3">
-              {pendingApprovals.map(item => (
-                <div key={item} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-100">
-                  <CheckCircle2 className="h-5 w-5 text-amber-500" />
-                  <span className="text-sm font-medium text-slate-700">{item}</span>
-                </div>
-              ))}
-            </div>
+          <div className="mt-4 flex flex-1 flex-col justify-end rounded-3xl bg-slate-950 p-5 text-white">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-100/70">Latest Archive</p>
+            <h4 className="mt-3 line-clamp-3 text-lg font-bold leading-snug">{latest?.thesis_title || 'No archive records yet'}</h4>
+            <p className="mt-3 text-sm text-white/60">{latest ? `${latest.batch_year || 'No batch'} / ${latest.section_block || 'No section'}` : 'Import or archive a thesis to begin.'}</p>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
-        <h3 className="mb-4 text-lg font-bold text-slate-950">Recent Activity</h3>
-        <div className="grid gap-3 md:grid-cols-2">
+      <section className="min-h-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70">
+        <h3 className="mb-4 text-lg font-bold text-slate-950">Recent Archives</h3>
+        <div className="grid h-[calc(100%-2.75rem)] gap-3 md:grid-cols-2 xl:grid-cols-3">
           {recent.map((thesis: Thesis) => (
-            <div key={thesis.archive_id} className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+            <div key={thesis.archive_id} className="flex flex-col justify-between rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
               <p className="line-clamp-2 font-semibold text-slate-900">{thesis.thesis_title}</p>
               <p className="mt-2 text-sm text-slate-500">{dateLabel(thesis.created_at)} / {thesis.batch_year || 'No batch'}</p>
             </div>
@@ -535,21 +573,26 @@ function ThesisTable({ theses, onSelect }: { theses: Thesis[]; onSelect: (thesis
           <tr>
             <th className="px-5 py-4">Title</th>
             <th className="px-5 py-4">Batch</th>
-            <th className="px-5 py-4">Adviser</th>
+            <th className="px-5 py-4">Authors</th>
             <th className="px-5 py-4">Section</th>
             <th className="px-5 py-4">Technology</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
-          {theses.map(thesis => (
-            <tr key={thesis.archive_id} onClick={() => onSelect(thesis)} className="cursor-pointer hover:bg-rose-50/40">
-              <td className="max-w-xl px-5 py-4 font-semibold text-slate-900">{thesis.thesis_title}</td>
-              <td className="px-5 py-4 text-sm text-slate-600">{thesis.batch_year || 'N/A'}</td>
-              <td className="px-5 py-4 text-sm text-slate-600">{thesis.main_adviser || 'Unassigned'}</td>
-              <td className="px-5 py-4 text-sm text-slate-600">{thesis.section_block || 'N/A'}</td>
-              <td className="px-5 py-4"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{getTechBadges(thesis)[0]}</span></td>
-            </tr>
-          ))}
+          {theses.map(thesis => {
+            const authors = getAuthors(thesis);
+            const authorLabel = authors.length ? `${authors[0]}${authors.length > 1 ? ' et al.' : ''}` : 'No authors listed';
+
+            return (
+              <tr key={thesis.archive_id} onClick={() => onSelect(thesis)} className="cursor-pointer hover:bg-rose-50/40">
+                <td className="max-w-xl px-5 py-4 font-semibold text-slate-900">{thesis.thesis_title}</td>
+                <td className="px-5 py-4 text-sm text-slate-600">{thesis.batch_year || 'N/A'}</td>
+                <td className="px-5 py-4 text-sm font-medium text-slate-700">{authorLabel}</td>
+                <td className="px-5 py-4 text-sm text-slate-600">{thesis.section_block || 'N/A'}</td>
+                <td className="px-5 py-4"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{getTechBadges(thesis)[0]}</span></td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
